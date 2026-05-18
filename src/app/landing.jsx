@@ -248,6 +248,7 @@ export default function Landing({ onEnterApp }) {
         <p className="text-xs" style={{ color: 'var(--muted)' }}>
           Humanizador de textos · Norma APA 7 · Privacidad total
         </p>
+              <a href="https://wa.me/573152354199?text=Hola!%20quiero%20humanizar%20un%20texto" target="_blank" rel="noopener noreferrer" style={{ position:'fixed', bottom:24, right:24, zIndex:9999, background:'#25D366', color:'white', fontWeight:600, fontSize:14, borderRadius:50, padding:'12px 20px', textDecoration:'none', boxShadow:'0 4px 20px rgba(0,0,0,0.2)' }}>💬 ¡Escríbeme!</a>
       </footer>
     </div>
   );
