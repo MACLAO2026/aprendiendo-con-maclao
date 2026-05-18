@@ -41,9 +41,9 @@ export async function POST(request) {
       return NextResponse.json({ error: 'chunk invalido' }, { status: 400 });
     }
 
-    if (!process.env.GEMINI_API_KEY) {
+    if (!process.env.GROQ_API_KEY) {
       return NextResponse.json(
-        { error: 'GEMINI_API_KEY no esta configurada en .env.local' },
+        { error: 'GROQ_API_KEY no esta configurada en .env.local' },
         { status: 500 }
       );
     }
@@ -84,40 +84,30 @@ export async function POST(request) {
 
     const prompt = `Modo: ${contextNote}\n\n${passNote}${chunkNote}Texto a transformar con tu voz:\n\n${chunk}`;
 
-    const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
+    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user',   content: prompt },
+        ],
+        max_tokens: 4096,
+        temperature: 0.9,
+      }),
+    });
 
-    const geminiBody = {
-      system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: { maxOutputTokens: 4096, temperature: 0.9 },
-    };
-
-    // Reintento automático con backoff si hay límite de tasa
-    let result = '';
-    for (let attempt = 0; attempt < 4; attempt++) {
-      const res = await fetch(GEMINI_URL, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(geminiBody),
-      });
-
-      if (res.status === 429) {
-        if (attempt < 3) {
-          await new Promise(r => setTimeout(r, (attempt + 1) * 8000));
-          continue;
-        }
-        return NextResponse.json({ error: 'Límite de solicitudes alcanzado. Espera 1 minuto e intenta de nuevo.' }, { status: 429 });
-      }
-
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData?.error?.message || `HTTP ${res.status}`);
-      }
-
-      const data = await res.json();
-      result = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      break;
+    if (!groqRes.ok) {
+      const errData = await groqRes.json().catch(() => ({}));
+      throw new Error(errData?.error?.message || `HTTP ${groqRes.status}`);
     }
+
+    const groqData = await groqRes.json();
+    let result = groqData.choices?.[0]?.message?.content || '';
 
     result = result
       .replace(/ — /g, ', ').replace(/ – /g, ', ')
@@ -128,8 +118,8 @@ export async function POST(request) {
   } catch (err) {
     console.error('[/api/humanize]', err);
 
-    if (err.message?.includes('429') || err.message?.includes('quota')) {
-      return NextResponse.json({ error: 'Límite de solicitudes alcanzado. Espera 1 minuto e intenta de nuevo.' }, { status: 429 });
+    if (err.message?.includes('429') || err.message?.includes('rate_limit')) {
+      return NextResponse.json({ error: 'Límite de solicitudes alcanzado. Espera un momento e intenta de nuevo.' }, { status: 429 });
     }
 
     return NextResponse.json(
