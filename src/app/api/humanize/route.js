@@ -88,12 +88,26 @@ export async function POST(request) {
     const prompt = `Modo: ${contextNote}\n\n${passNote}${chunkNote}Texto a transformar con tu voz:\n\n${chunk}`;
 
     const model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.0-flash',
       systemInstruction: SYSTEM_PROMPT,
       generationConfig: { maxOutputTokens: 4096, temperature: 0.9 },
     });
 
-    const response = await model.generateContent(prompt);
+    // Reintento automático si hay límite de tasa (gratis: 15 req/min)
+    let response;
+    for (let attempt = 0; attempt < 4; attempt++) {
+      try {
+        response = await model.generateContent(prompt);
+        break;
+      } catch (e) {
+        const isRateLimit = e.status === 429 || e.message?.includes('quota') || e.message?.includes('rate');
+        if (isRateLimit && attempt < 3) {
+          await new Promise(r => setTimeout(r, (attempt + 1) * 5000));
+          continue;
+        }
+        throw e;
+      }
+    }
     let result = response.response.text();
 
     result = result

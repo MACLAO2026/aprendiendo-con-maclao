@@ -82,6 +82,9 @@ export function useHumanizer() {
 
           const chunkDone = passBase + Math.round(((i + 1) / total) * passShare);
           setProgress(chunkDone);
+
+          // Pausa entre fragmentos para respetar límite gratuito de Gemini (15 req/min)
+          if (i < total - 1) await new Promise(r => setTimeout(r, 4200));
         }
 
         // 3. Join results — output becomes input for next pass
