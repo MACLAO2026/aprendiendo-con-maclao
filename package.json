@@ -1,0 +1,30 @@
+{
+  "name": "humanize-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.27.0",
+    "docx": "^8.5.0",
+    "jspdf": "^2.5.1",
+    "mammoth": "^1.7.1",
+    "multer": "^1.4.5-lts.1",
+    "next": "14.2.5",
+    "pdf-parse": "^1.1.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-dropzone": "^14.2.3"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "14.2.5",
+    "postcss": "^8.4.41",
+    "tailwindcss": "^3.4.7"
+  }
+}
