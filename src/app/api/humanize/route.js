@@ -1,7 +1,4 @@
 import { NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 const SYSTEM_PROMPT = `Eres Maria, estudiante colombiana de maestria en educacion. Llevas anos escribiendo tesis y conoces bien tu propia voz. Reescribe el texto que recibes exactamente como tu lo escribirias: con tus manias, tus giros, tu ritmo irregular.
 
@@ -87,28 +84,40 @@ export async function POST(request) {
 
     const prompt = `Modo: ${contextNote}\n\n${passNote}${chunkNote}Texto a transformar con tu voz:\n\n${chunk}`;
 
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash',
-      systemInstruction: SYSTEM_PROMPT,
-      generationConfig: { maxOutputTokens: 4096, temperature: 0.9 },
-    });
+    const GEMINI_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
 
-    // Reintento automático si hay límite de tasa (gratis: 15 req/min)
-    let response;
+    const body = {
+      system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: { maxOutputTokens: 4096, temperature: 0.9 },
+    };
+
+    // Reintento automático con backoff si hay límite de tasa
+    let result = '';
     for (let attempt = 0; attempt < 4; attempt++) {
-      try {
-        response = await model.generateContent(prompt);
-        break;
-      } catch (e) {
-        const isRateLimit = e.status === 429 || e.message?.includes('quota') || e.message?.includes('rate');
-        if (isRateLimit && attempt < 3) {
-          await new Promise(r => setTimeout(r, (attempt + 1) * 5000));
+      const res = await fetch(GEMINI_URL, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(body),
+      });
+
+      if (res.status === 429) {
+        if (attempt < 3) {
+          await new Promise(r => setTimeout(r, (attempt + 1) * 8000));
           continue;
         }
-        throw e;
+        return NextResponse.json({ error: 'Límite de solicitudes alcanzado. Espera 1 minuto e intenta de nuevo.' }, { status: 429 });
       }
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData?.error?.message || `HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
+      result = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      break;
     }
-    let result = response.response.text();
 
     result = result
       .replace(/ — /g, ', ').replace(/ – /g, ', ')
@@ -119,11 +128,8 @@ export async function POST(request) {
   } catch (err) {
     console.error('[/api/humanize]', err);
 
-    if (err.status === 429 || err.message?.includes('quota')) {
-      return NextResponse.json({ error: 'Limite de solicitudes alcanzado. Espera un momento e intenta de nuevo.' }, { status: 429 });
-    }
-    if (err.status === 400 && err.message?.includes('API_KEY')) {
-      return NextResponse.json({ error: 'GEMINI_API_KEY invalida.' }, { status: 401 });
+    if (err.message?.includes('429') || err.message?.includes('quota')) {
+      return NextResponse.json({ error: 'Límite de solicitudes alcanzado. Espera 1 minuto e intenta de nuevo.' }, { status: 429 });
     }
 
     return NextResponse.json(
