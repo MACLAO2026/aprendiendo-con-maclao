@@ -42,21 +42,48 @@ export default function Header({ activeTab, onTabChange }) {
 
         {/* Logo */}
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-               style={{ background: 'linear-gradient(135deg, #D946EF, #A855F7)' }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path d="M12 3L2 8l10 5 10-5-10-5z" fill="white" opacity="0.95"/>
-              <path d="M2 16l10 5 10-5" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
-              <path d="M2 12l10 5 10-5" stroke="white" strokeWidth="1.8" strokeLinecap="round" opacity="0.7"/>
+          {/* Play-button icon – marca Aprendiendo con Maclao */}
+          <div className="relative w-10 h-10 flex-shrink-0">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* Glow background */}
+              <circle cx="20" cy="20" r="20" fill="url(#headerGrad)"/>
+              {/* Neon border */}
+              <circle cx="20" cy="20" r="18.5" stroke="#C026D3" strokeWidth="1.5" fill="none" opacity="0.7"/>
+              {/* Play triangle */}
+              <polygon points="16,13 28,20 16,27" fill="white"/>
+              <defs>
+                <radialGradient id="headerGrad" cx="40%" cy="35%" r="65%">
+                  <stop offset="0%"   stopColor="#5B21B6"/>
+                  <stop offset="100%" stopColor="#0D0020"/>
+                </radialGradient>
+              </defs>
             </svg>
+            {/* Gold dot accent */}
+            <span style={{
+              position:'absolute', bottom:1, right:1,
+              width:8, height:8, borderRadius:'50%',
+              background:'linear-gradient(135deg,#F59E0B,#FBBF24)',
+              boxShadow:'0 0 6px #F59E0B',
+            }}/>
           </div>
+
           <div className="flex flex-col leading-none">
-            <span className="font-bold text-base tracking-tight" style={{ color: 'var(--text)' }}>
-              Aprendiendo con <span style={{ color: '#D946EF' }}>Maclao</span>
+            <span className="font-black text-sm tracking-tight" style={{ color: 'var(--text)', lineHeight:1.2 }}>
+              Aprendiendo con{' '}
+              <span style={{
+                background: 'linear-gradient(90deg, #F59E0B, #FBBF24)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                fontStyle: 'italic',
+              }}>
+                Maclao
+              </span>
             </span>
-            <span className="text-xs" style={{ color: 'var(--muted)' }}>Humanizador de textos</span>
+            <span className="text-xs" style={{ color: 'var(--muted)' }}>
+              Conocimiento que inspira · Humanizador IA
+            </span>
           </div>
-          <span className="badge badge-mint hidden sm:inline-flex">Beta</span>
         </div>
 
         {/* Navigation tabs */}

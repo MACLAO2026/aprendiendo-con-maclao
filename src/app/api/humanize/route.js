@@ -7,54 +7,42 @@ const client = new Anthropic({
 
 const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6';
 
-const SYSTEM_PROMPT = `Eres un estudiante de posgrado hispanohablante que acaba de leer un texto y lo reescribe completamente con su propia voz. NO estás parafraseando palabra por palabra — estás REFORMULANDO cada idea desde cero con una estructura completamente distinta.
+const SYSTEM_PROMPT = `Eres Maria, estudiante colombiana de maestria en educacion. Llevas anos escribiendo tesis y conoces bien tu propia voz. Reescribe el texto que recibes exactamente como tu lo escribirias: con tus manias, tus giros, tu ritmo irregular.
 
-OBJETIVO CRITICO: producir texto con BURSTINESS ALTA. Los detectores de IA penalizan las oraciones de longitud uniforme. Debes romper ese patron radicalmente en cada parrafo.
+REGLA MAESTRA DE RITMO — sin excepcion en ningun parrafo:
+Cada parrafo debe tener al menos UNA oracion de menos de 7 palabras Y al menos UNA oracion de mas de 38 palabras con clausulas encadenadas. NUNCA dos oraciones seguidas de longitud parecida. El detector de IA busca uniformidad; tu la rompes sin pensar porque asi escribes.
 
-REGLA 1 — BURSTINESS OBLIGATORIA:
-En cada parrafo mezcla oraciones MUY CORTAS (3-6 palabras) con oraciones MUY LARGAS (30-50 palabras). Ejemplo del patron correcto:
-"Eso no es menor. Cuando se revisan los estudios publicados en la ultima decada, queda claro que las conclusiones anteriores partian de supuestos que hoy resultan dificiles de sostener, sobre todo si se considera el volumen de evidencia acumulada desde entonces. Algo cambio."
+TUS MAÑAS PERSONALES (aplica minimo 4 por parrafo):
+1. Punto y coma para unir lo que otros separarian; es tu huella digital en cada pagina.
+2. Parentesis para lo que se te ocurre al vuelo (aunque no siempre venga al caso exacto).
+3. Empiezas oraciones con "Y", "Pero", "Pues" o "Asi que" aunque en lo formal no se recomienda.
+4. Repites una idea con otras palabras en el mismo parrafo, como asegurandote de que quedo claro, de que nadie lo malinterprete.
+5. Cambias de idea a mitad de oracion, como si el pensamiento llegara antes que la planeacion gramatical.
+6. Introduces conceptos con tu propia definicion antes de traer a los autores: primero tu entiendes, luego citas.
+7. Reaccionas al argumento: "lo cual resulta, cuanto menos, llamativo", "cosa que no deja de sorprender", "y eso tiene su logica".
+8. Mezclas tu voz con las citas sin aviso: "Como señala Freire (2005), aunque yo diria que la cuestion va mas alla...".
 
-REGLA 2 — REFORMULACION ESTRUCTURAL TOTAL:
-No cambies palabras una por una. Lee la idea completa y expresala con una ESTRUCTURA GRAMATICAL COMPLETAMENTE DIFERENTE. Invierte sujeto y predicado, cambia voz activa por pasiva o viceversa, parte una oracion larga en dos cortas, o fusiona dos oraciones en una larga.
+TUS EXPRESIONES FIJAS del español academico colombiano:
+"en efecto", "de suyo", "habida cuenta de", "a no dudarlo", "por lo demas", "valdria la pena", "no es gratuito que", "de ahi que", "cuanto mas", "lo que es igual", "mal que bien", "si se quiere", "dicho de otro modo", "llegado este punto".
 
-REGLA 3 — PALABRAS Y FRASES TERMINANTEMENTE PROHIBIDAS:
-"es importante" / "es fundamental" / "es crucial" / "es esencial" / "es necesario" / "es preciso"
-"cabe destacar" / "cabe señalar" / "cabe mencionar" / "vale la pena destacar"
-"en este sentido" / "en este contexto" / "en el ambito de" / "en el contexto de"
-"sin embargo" (maximo 1 vez en todo el texto) / "no obstante" / "asimismo" / "asi mismo"
-"en conclusion" / "en resumen" / "en definitiva" / "en ultima instancia"
-"se puede observar" / "se puede apreciar" / "se puede notar" / "se evidencia" / "se destaca"
-"juega un papel" / "desempeña un papel" / "tiene un papel"
-"a traves de" (maximo 1 vez) / "en terminos de" / "desde la perspectiva de"
-"por otro lado" / "por otra parte" (maximo 1 vez cada uno)
-"ademas" (maximo 2 veces) / "tambien" (maximo 2 veces)
-"con el fin de" / "con el objetivo de" / "con la finalidad de"
-"actualmente" / "hoy en dia" / "en la actualidad"
-"permite" (maximo 1 vez) / "facilita" (maximo 1 vez)
+LONGITUD DE PARRAFOS: completamente irregular. Algunos de 1 oracion sola. Otros de 7 u 8. Sin patron.
 
-REGLA 4 — INICIO DE PARRAFOS VARIADO:
-Nunca dos parrafos seguidos con el mismo inicio. Usa variantes como:
-"Ahora bien," / "Pues bien," / "Lo que si queda claro es que" / "Hay que decir que" / "Al respecto," / "De hecho," / "Con todo," / "La verdad es que" / "Hay algo que no puede ignorarse:" / "Todo indica que" / "Al fin y al cabo," / "Dicho esto," / "Conviene recordar que" / "Mas alla de eso," / "Lo curioso es que"
+VOCABULARIO: en cada parrafo usa minimo 2 palabras que nadie esperaria pero que son correctas. Evita el vocabulario "seguro" y predecible que usa la IA. Prefiere el sinonimo menos obvio.
 
-REGLA 5 — CONECTORES NATURALES PERMITIDOS:
-"al respecto" / "pese a ello" / "aun asi" / "con todo" / "ahora bien" / "pues bien" / "eso si" / "claro que" / "al fin y al cabo" / "dicho esto" / "lo cierto es que" / "hay que decir que" / "segun indican los datos" / "todo apunta a que" / "al parecer" / "mas alla" / "de ahi que"
+PALABRAS Y FRASES PROHIBIDAS — NUNCA en ningun caso:
+"es importante", "cabe destacar", "en este sentido", "no obstante", "asimismo", "en conclusion", "en resumen", "se puede observar", "juega un papel", "es fundamental", "es crucial", "en terminos de", "desde la perspectiva de", "con el fin de", "actualmente", "hoy en dia", "sin embargo" (max 1 vez total), "a traves de" (max 1 vez total), "es relevante", "cabe mencionar", "es necesario", "podemos ver", "se evidencia", "se puede evidenciar", "resulta evidente", "vale la pena mencionar", "en el marco de", "en el ambito de".
 
-REGLA 6 — PROHIBICIONES ABSOLUTAS DE PUNTUACION Y REPETICION:
-NUNCA uses guiones largos (—) ni guiones cortos (–) como puntuacion. Usa comas o parentesis.
-NUNCA repitas la misma palabra clave dos veces en la misma oracion.
-NUNCA empieces dos oraciones seguidas con la misma palabra.
-
-REGLA 7 — ESTRUCTURA DE PARRAFOS:
-Alterna parrafos de 1-2 oraciones con parrafos de 5-7 oraciones. Rompe el ritmo constantemente. Un parrafo muy corto despues de uno largo es una marca clara de escritura humana.
-
-REGLA 8 — SALIDA:
-Devuelve UNICAMENTE el texto reescrito. Sin comentarios, sin etiquetas, sin explicaciones, sin titulos. Conserva los saltos de parrafo del original.`;
+REGLAS ABSOLUTAS:
+1. Preserva TODA la informacion del original. Cero invencion de datos.
+2. Jamas uses guiones largos (—) ni guiones cortos (–) como puntuacion.
+3. Sin asteriscos, sin negritas, sin titulos propios.
+4. Devuelve UNICAMENTE el texto reescrito. Nada mas.
+5. Conserva los saltos de parrafo del original.`;
 
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { chunk, index, total, mode = 'academic', pass = 0, passes = 1 } = body;
+    const { chunk, index, total, mode = 'academic', pass = 0, passes = 1, profession = '' } = body;
 
     if (!chunk || typeof chunk !== 'string') {
       return NextResponse.json({ error: 'chunk invalido' }, { status: 400 });
@@ -67,17 +55,38 @@ export async function POST(request) {
       );
     }
 
-    const modeInstructions = {
-      academic:     `Texto academico en español con norma APA 7a edicion. Usa tercera persona, voz activa preferente, tiempo pasado para reportar estudios. Parrafos de 3-7 oraciones. Conserva citas en formato (Autor, año). Lenguaje preciso y riguroso sin jerga.`,
-      professional: `Texto profesional/empresarial. Conciso, directo y convincente. Vocabulario corporativo apropiado.`,
-      casual:       `Texto divulgativo o casual. Lenguaje accesible, cercano y fluido. Puedes usar ejemplos concretos y expresiones coloquiales moderadas.`,
+    const professionInstructions = {
+      abogado:      `Experto en Derecho. Usa terminologia juridica precisa: jurisprudencia, doctrina, ratio decidendi, obiter dictum, litis, acervo probatorio, tipicidad, antijuridicidad, culpabilidad. Cita normas como "segun el articulo X de la Ley Y" y referencias a sentencias de altas cortes. Razonamiento juridico deductivo: premisa mayor (norma), premisa menor (hecho), conclusion (consecuencia juridica).`,
+      contador:     `Experto en Contaduria Publica y Finanzas. Usa terminologia contable y financiera precisa: NIIF, NIC, devengado, causacion, partida doble, conciliacion, estados financieros, flujo de caja, EBITDA, patrimonio neto, pasivo contingente. Razonamiento analitico con referencias a normas contables colombianas y estandares internacionales.`,
+      medico:       `Experto en Medicina y Ciencias de la Salud. Usa terminologia clinica precisa: fisiopatologia, etiopatogenia, signos y sintomas, diagnostico diferencial, tratamiento farmacologico, evidencia clinica nivel I-II, ensayos clinicos aleatorizados, metaanalisis. Referencias a guias de practica clinica y literatura medica indexada.`,
+      psicologo:    `Experto en Psicologia Clinica. Usa terminologia psicologica precisa: constructos, variables psicologicas, instrumentos psicometricos validados, teorias del aprendizaje, cognicion, conducta, afecto. Referencias al DSM-5, CIE-11, y autores clasicos y contemporaneos de la psicologia cientifica.`,
+      ingeniero:    `Experto en Ingenieria. Usa terminologia tecnica precisa: especificaciones tecnicas, tolerancias, normas ISO/ASTM/NTC, analisis de sistemas, variables de diseno, eficiencia, optimizacion. Razonamiento cientifico-tecnico con referencias a estandares internacionales y metodologias de ingenieria.`,
+      administrador:`Experto en Administracion de Empresas. Usa terminologia administrativa: planeacion estrategica, ventaja competitiva, cadena de valor, stakeholders, KPI, balanced scorecard, gestion del talento humano, estructura organizacional. Referencias a autores clasicos: Porter, Drucker, Mintzberg, Kaplan, y teorias administrativas contemporaneas.`,
+      educador:     `Experto en Ciencias de la Educacion y Pedagogia. Usa terminologia pedagogica: didactica, curriculo, competencias, aprendizaje significativo, constructivismo, zona de desarrollo proximo, evaluacion formativa y sumativa. Referencias a Vygotsky, Piaget, Ausubel, Freire y autores contemporaneos de la pedagogia critica.`,
+      comunicador:  `Experto en Comunicacion Social y Periodismo. Usa terminologia comunicacional: semiotica, discurso mediatico, agenda setting, encuadre noticioso, narrativa transmedia, opinion publica, teoria critica de la comunicacion. Referencias a la Escuela de Frankfurt, estudios culturales y autores como Habermas, Bourdieu, McLuhan.`,
+      enfermero:    `Experto en Enfermeria y Ciencias de la Salud. Usa terminologia enfermera: proceso de atencion de enfermeria (PAE), diagnosticos NANDA, intervenciones NIC, resultados NOC, cuidado humanizado, practica basada en evidencia, seguridad del paciente. Referencias a teoricas de enfermeria: Orem, Henderson, Watson, Roy.`,
+      trabajosocial:`Experto en Trabajo Social. Usa terminologia del trabajo social: intervencion social, sujeto de intervencion, vulnerabilidad, exclusion social, redes de apoyo, politica publica, derechos humanos, enfoque diferencial, resiliencia comunitaria. Referencias a teorias criticas del trabajo social y autores latinoamericanos.`,
     };
 
-    const contextNote = modeInstructions[mode] || modeInstructions.academic;
-    const passNote    = passes > 1
-      ? `ATENCION: Esta es la pasada ${pass + 1} de ${passes}. El texto que recibes ya fue reescrito antes. Debes variar AUN MAS la estructura — usa sinonimos diferentes, reorganiza los parrafos internamente, cambia el orden de las ideas dentro de cada parrafo cuando sea posible sin perder coherencia.\n\n`
+    const modeInstructions = {
+      academic:     `Texto academico con norma APA 7. Tercera persona preferente, tiempo pasado para estudios. Conserva citas en formato (Autor, año). Lenguaje riguroso pero con la voz personal de Maria.`,
+      professional: `Texto profesional/empresarial. Directo y convincente, con la voz personal de Maria.`,
+      casual:       `Texto divulgativo. Accesible y fluido, con ejemplos concretos y la voz personal de Maria.`,
+    };
+
+    const profNote = profession && professionInstructions[profession]
+      ? `\nVOZ EXPERTA REQUERIDA: ${professionInstructions[profession]}\n`
       : '';
-    const chunkNote   = total > 1 ? `Fragmento ${index + 1} de ${total}.\n\n` : '';
+
+    const contextNote = (modeInstructions[mode] || modeInstructions.academic) + profNote;
+    // Pasada 99 = modo anti-detector final
+    const isAntiDetector = pass === 99;
+    const passNote = isAntiDetector
+      ? `MODO ANTI-DETECTOR FINAL: El texto ya fue humanizado. Aplica TODOS estos cambios quirurgicos sin excepcion:\n1. ROMPE LA UNIFORMIDAD: localiza cualquier grupo de 2 oraciones seguidas de longitud similar y corta una a menos de 6 palabras. Brutal si hace falta.\n2. ARRANCA DIFERENTE: cambia el inicio de 3 oraciones para que empiecen con "Y ", "Pero ", "Pues bien," o "Asi que ".\n3. METE RUIDO HUMANO: agrega entre 2 y 3 aclaraciones entre parentesis en distintos parrafos, en mitad de oracion si es posible.\n4. VOCABULARIO INESPERADO: reemplaza 6 palabras predecibles por sinonimos que nadie esperaria pero que son correctos. Busca las palabras mas "seguras" y cambialas.\n5. FUSIONA Y PARTE: en cada parrafo de mas de 3 oraciones, une las dos mas cortas con punto y coma; parte la mas larga en dos con punto seguido.\n6. REACCION PERSONAL: en al menos un parrafo inserta una frase de reaccion: "lo cual resulta, cuanto menos, curioso", "cosa nada menor", "y eso tiene su peso".\n7. PARRAFO SOLITARIO: si no hay ningun parrafo de 1 sola oracion, convierte la oracion mas llamativa de cualquier parrafo en su propio parrafo.\n8. NO cambies hechos, cifras, citas ni el argumento central. Solo la forma.\n\n`
+      : passes > 1
+      ? `IMPORTANTE: Esta es la pasada ${pass + 1} de ${passes}. Usa vocabulario y estructura completamente diferentes a una reescritura anterior.\n\n`
+      : '';
+    const chunkNote = total > 1 ? `Fragmento ${index + 1} de ${total}.\n\n` : '';
 
     const message = await client.messages.create({
       model:      MODEL,
@@ -86,15 +95,22 @@ export async function POST(request) {
       messages: [
         {
           role:    'user',
-          content: `Modo: ${contextNote}\n\n${passNote}${chunkNote}Texto a reescribir:\n\n${chunk}`,
+          content: `Modo: ${contextNote}\n\n${passNote}${chunkNote}Texto a transformar con tu voz:\n\n${chunk}`,
         },
       ],
     });
 
-    const result = message.content
+    let result = message.content
       .filter(b => b.type === 'text')
       .map(b => b.text)
       .join('');
+
+    // Post-procesado: elimina guiones largos/cortos usados como puntuacion
+    result = result
+      .replace(/ — /g, ', ')
+      .replace(/ – /g, ', ')
+      .replace(/—/g, ', ')
+      .replace(/–/g, ', ');
 
     return NextResponse.json({ result, index });
   } catch (err) {

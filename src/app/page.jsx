@@ -18,12 +18,27 @@ const MODES = [
   { id: 'casual',       label: 'Divulgativo', icon: '📖', desc: 'Blogs, noticias, divulgación' },
 ];
 
+const PROFESSIONS = [
+  { id: '',             label: 'General',        icon: '📝' },
+  { id: 'abogado',      label: 'Derecho',         icon: '⚖️' },
+  { id: 'contador',     label: 'Contaduría',      icon: '📊' },
+  { id: 'medico',       label: 'Medicina',        icon: '🩺' },
+  { id: 'psicologo',    label: 'Psicología',      icon: '🧠' },
+  { id: 'ingeniero',    label: 'Ingeniería',      icon: '⚙️' },
+  { id: 'administrador',label: 'Administración',  icon: '🏢' },
+  { id: 'educador',     label: 'Educación',       icon: '📚' },
+  { id: 'comunicador',  label: 'Comunicación',    icon: '📡' },
+  { id: 'enfermero',    label: 'Enfermería',      icon: '💉' },
+  { id: 'trabajosocial',label: 'Trabajo Social',  icon: '🤝' },
+];
+
 export default function Home() {
   const [showApp,    setShowApp]    = useState(false);
   const [activeTab,  setActiveTab]  = useState('editor');
   const [inputText,  setInputText]  = useState('');
   const [mode,       setMode]       = useState('academic');
   const [passes,     setPasses]     = useState(1);
+  const [profession, setProfession] = useState('');
   const [filename,   setFilename]   = useState('humanizado');
 
   const { humanize, cancel, reset, status, progress, step, result, error } = useHumanizer();
@@ -45,8 +60,8 @@ export default function Home() {
 
   const handleHumanize = useCallback(async () => {
     if (!inputText.trim()) return;
-    await humanize(inputText, mode, passes);
-  }, [inputText, mode, humanize]);
+    await humanize(inputText, mode, passes, profession);
+  }, [inputText, mode, passes, profession, humanize]);
 
   const handleDone = useCallback(() => {
     if (result && inputText) {
@@ -62,7 +77,7 @@ export default function Home() {
   }
   if (!isDone && saved) setSaved(false);
 
-  const loadFromHistory = useCallback((original, res) => {
+  const loadFromHistory = useCallback((original, _res) => {
     setInputText(original);
     // Inject result: we need to trick the humanizer state
     // Instead, switch to editor tab and show the result
@@ -161,6 +176,32 @@ export default function Home() {
               <span className="text-xs" style={{ color: 'var(--muted)' }}>
                 {passes === 1 ? 'Estándar' : passes === 2 ? 'Más natural' : 'Máxima humanización'}
               </span>
+            </div>
+
+            {/* Profession selector */}
+            <div>
+              <p className="text-sm font-medium mb-2" style={{ color: 'var(--muted)' }}>
+                Área de conocimiento:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {PROFESSIONS.map(p => (
+                  <button
+                    key={p.id}
+                    onClick={() => setProfession(p.id)}
+                    disabled={isProcessing}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium
+                               transition-all duration-200 hover:scale-105 disabled:opacity-50"
+                    style={{
+                      background: profession === p.id ? 'linear-gradient(135deg, #D946EF, #A855F7)' : 'var(--card)',
+                      color:      profession === p.id ? '#FFFFFF' : 'var(--muted)',
+                      border:     `1px solid ${profession === p.id ? '#D946EF' : 'var(--border)'}`,
+                    }}
+                  >
+                    <span>{p.icon}</span>
+                    {p.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Input area */}
@@ -276,7 +317,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="mt-20 pb-8 text-center">
         <p className="text-xs" style={{ color: 'var(--muted)' }}>
-          HumanizeAI · Procesamiento local y privado · Sin almacenamiento en servidor
+          © Aprendiendo con Maclao · María Claudia Ortiz Jaramillo · Conocimiento que inspira, acciones que transforman
         </p>
       </footer>
     </div>

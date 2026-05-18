@@ -20,7 +20,7 @@ export function useHumanizer() {
    * @param {string} text   Full input text
    * @param {string} mode   'academic' | 'professional' | 'casual'
    */
-  const humanize = useCallback(async (text, mode = 'academic', passes = 1) => {
+  const humanize = useCallback(async (text, mode = 'academic', passes = 1, profession = '') => {
     if (!text.trim()) return;
 
     abortRef.current = false;
@@ -69,7 +69,7 @@ export function useHumanizer() {
           const res = await fetch('/api/humanize', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ chunk: chunks[i], index: i, total, mode, pass, passes }),
+            body:    JSON.stringify({ chunk: chunks[i], index: i, total, mode, pass, passes, profession }),
           });
 
           if (!res.ok) {
@@ -87,16 +87,59 @@ export function useHumanizer() {
         // 3. Join results — output becomes input for next pass
         setStep(`Uniendo fragmentos…${passLabel}`);
         const joined = joinChunks(results);
-        // Reemplaza guiones largos/cortos usados como puntuación por comas
         currentText = joined
-          .replace(/ —+ /g, ', ')
-          .replace(/ –+ /g, ', ');
+          .replace(/—/g, ',').replace(/–/g, ',')
+          .replace(/\*\*(.+?)\*\*/g, '$1')
+          .replace(/\*(.+?)\*/g, '$1')
+          .replace(/\*/g, '');
+      }
+
+      // 4. Pasada final anti-detector (siempre, independiente de las pasadas elegidas)
+      if (!abortRef.current) {
+        setStep('Aplicando filtro anti-detector…');
+        setProgress(93);
+
+        const antiChunks = splitIntoChunks(currentText);
+        const antiResults = new Array(antiChunks.length).fill('');
+
+        for (let i = 0; i < antiChunks.length; i++) {
+          if (abortRef.current) break;
+
+          const res = await fetch('/api/humanize', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({
+              chunk:   antiChunks[i],
+              index:   i,
+              total:   antiChunks.length,
+              mode,
+              pass:    99,
+              passes:  100,
+              profession,
+            }),
+          });
+
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({ error: 'Error desconocido' }));
+            throw new Error(err.error || `HTTP ${res.status}`);
+          }
+
+          const data = await res.json();
+          antiResults[i] = data.result;
+          setProgress(93 + Math.round(((i + 1) / antiChunks.length) * 6));
+        }
+
+        currentText = joinChunks(antiResults)
+          .replace(/—/g, ',').replace(/–/g, ',')
+          .replace(/\*\*(.+?)\*\*/g, '$1')
+          .replace(/\*(.+?)\*/g, '$1')
+          .replace(/\*/g, '');
       }
 
       setProgress(100);
       setResult(currentText);
       setStatus('done');
-      setStep(`✓ Listo — ${passes} pasada${passes !== 1 ? 's' : ''} completada${passes !== 1 ? 's' : ''}`);
+      setStep(`✓ Listo — filtro anti-detector aplicado`);
     } catch (err) {
       console.error('[useHumanizer]', err);
       setError(err.message);
