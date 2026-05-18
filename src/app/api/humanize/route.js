@@ -1,11 +1,7 @@
 import { NextResponse } from 'next/server';
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
-
-const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6';
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 const SYSTEM_PROMPT = `Eres Maria, estudiante colombiana de maestria en educacion. Llevas anos escribiendo tesis y conoces bien tu propia voz. Reescribe el texto que recibes exactamente como tu lo escribirias: con tus manias, tus giros, tu ritmo irregular.
 
@@ -48,30 +44,30 @@ export async function POST(request) {
       return NextResponse.json({ error: 'chunk invalido' }, { status: 400 });
     }
 
-    if (!process.env.ANTHROPIC_API_KEY) {
+    if (!process.env.GEMINI_API_KEY) {
       return NextResponse.json(
-        { error: 'ANTHROPIC_API_KEY no esta configurada en .env.local' },
+        { error: 'GEMINI_API_KEY no esta configurada en .env.local' },
         { status: 500 }
       );
     }
 
     const professionInstructions = {
-      abogado:      `Experto en Derecho. Usa terminologia juridica precisa: jurisprudencia, doctrina, ratio decidendi, obiter dictum, litis, acervo probatorio, tipicidad, antijuridicidad, culpabilidad. Cita normas como "segun el articulo X de la Ley Y" y referencias a sentencias de altas cortes. Razonamiento juridico deductivo: premisa mayor (norma), premisa menor (hecho), conclusion (consecuencia juridica).`,
-      contador:     `Experto en Contaduria Publica y Finanzas. Usa terminologia contable y financiera precisa: NIIF, NIC, devengado, causacion, partida doble, conciliacion, estados financieros, flujo de caja, EBITDA, patrimonio neto, pasivo contingente. Razonamiento analitico con referencias a normas contables colombianas y estandares internacionales.`,
-      medico:       `Experto en Medicina y Ciencias de la Salud. Usa terminologia clinica precisa: fisiopatologia, etiopatogenia, signos y sintomas, diagnostico diferencial, tratamiento farmacologico, evidencia clinica nivel I-II, ensayos clinicos aleatorizados, metaanalisis. Referencias a guias de practica clinica y literatura medica indexada.`,
-      psicologo:    `Experto en Psicologia Clinica. Usa terminologia psicologica precisa: constructos, variables psicologicas, instrumentos psicometricos validados, teorias del aprendizaje, cognicion, conducta, afecto. Referencias al DSM-5, CIE-11, y autores clasicos y contemporaneos de la psicologia cientifica.`,
-      ingeniero:    `Experto en Ingenieria. Usa terminologia tecnica precisa: especificaciones tecnicas, tolerancias, normas ISO/ASTM/NTC, analisis de sistemas, variables de diseno, eficiencia, optimizacion. Razonamiento cientifico-tecnico con referencias a estandares internacionales y metodologias de ingenieria.`,
-      administrador:`Experto en Administracion de Empresas. Usa terminologia administrativa: planeacion estrategica, ventaja competitiva, cadena de valor, stakeholders, KPI, balanced scorecard, gestion del talento humano, estructura organizacional. Referencias a autores clasicos: Porter, Drucker, Mintzberg, Kaplan, y teorias administrativas contemporaneas.`,
-      educador:     `Experto en Ciencias de la Educacion y Pedagogia. Usa terminologia pedagogica: didactica, curriculo, competencias, aprendizaje significativo, constructivismo, zona de desarrollo proximo, evaluacion formativa y sumativa. Referencias a Vygotsky, Piaget, Ausubel, Freire y autores contemporaneos de la pedagogia critica.`,
-      comunicador:  `Experto en Comunicacion Social y Periodismo. Usa terminologia comunicacional: semiotica, discurso mediatico, agenda setting, encuadre noticioso, narrativa transmedia, opinion publica, teoria critica de la comunicacion. Referencias a la Escuela de Frankfurt, estudios culturales y autores como Habermas, Bourdieu, McLuhan.`,
-      enfermero:    `Experto en Enfermeria y Ciencias de la Salud. Usa terminologia enfermera: proceso de atencion de enfermeria (PAE), diagnosticos NANDA, intervenciones NIC, resultados NOC, cuidado humanizado, practica basada en evidencia, seguridad del paciente. Referencias a teoricas de enfermeria: Orem, Henderson, Watson, Roy.`,
-      trabajosocial:`Experto en Trabajo Social. Usa terminologia del trabajo social: intervencion social, sujeto de intervencion, vulnerabilidad, exclusion social, redes de apoyo, politica publica, derechos humanos, enfoque diferencial, resiliencia comunitaria. Referencias a teorias criticas del trabajo social y autores latinoamericanos.`,
+      abogado:      `Experto en Derecho. Usa terminologia juridica precisa: jurisprudencia, doctrina, ratio decidendi, obiter dictum, litis, acervo probatorio, tipicidad, antijuridicidad, culpabilidad. Cita normas como "segun el articulo X de la Ley Y" y referencias a sentencias de altas cortes.`,
+      contador:     `Experto en Contaduria Publica y Finanzas. Usa terminologia contable precisa: NIIF, NIC, devengado, causacion, partida doble, conciliacion, estados financieros, flujo de caja, EBITDA, patrimonio neto, pasivo contingente.`,
+      medico:       `Experto en Medicina. Usa terminologia clinica: fisiopatologia, etiopatogenia, diagnostico diferencial, tratamiento farmacologico, ensayos clinicos aleatorizados, metaanalisis. Referencias a guias de practica clinica.`,
+      psicologo:    `Experto en Psicologia Clinica. Usa terminologia psicologica: constructos, variables psicologicas, instrumentos psicometricos, teorias del aprendizaje, cognicion, conducta. Referencias al DSM-5, CIE-11.`,
+      ingeniero:    `Experto en Ingenieria. Usa terminologia tecnica: especificaciones, tolerancias, normas ISO/ASTM/NTC, analisis de sistemas, eficiencia, optimizacion. Razonamiento cientifico-tecnico.`,
+      administrador:`Experto en Administracion de Empresas. Usa: planeacion estrategica, ventaja competitiva, cadena de valor, stakeholders, KPI, balanced scorecard. Referencias a Porter, Drucker, Mintzberg.`,
+      educador:     `Experto en Pedagogia. Usa: didactica, curriculo, competencias, aprendizaje significativo, constructivismo, zona de desarrollo proximo, evaluacion formativa. Referencias a Vygotsky, Piaget, Ausubel, Freire.`,
+      comunicador:  `Experto en Comunicacion Social. Usa: semiotica, discurso mediatico, agenda setting, encuadre noticioso, opinion publica. Referencias a Habermas, Bourdieu, McLuhan.`,
+      enfermero:    `Experto en Enfermeria. Usa: proceso de atencion de enfermeria (PAE), diagnosticos NANDA, intervenciones NIC, resultados NOC, cuidado humanizado, practica basada en evidencia.`,
+      trabajosocial:`Experto en Trabajo Social. Usa: intervencion social, vulnerabilidad, exclusion social, redes de apoyo, politica publica, derechos humanos, enfoque diferencial, resiliencia comunitaria.`,
     };
 
     const modeInstructions = {
-      academic:     `Texto academico con norma APA 7. Tercera persona preferente, tiempo pasado para estudios. Conserva citas en formato (Autor, año). Lenguaje riguroso pero con la voz personal de Maria.`,
-      professional: `Texto profesional/empresarial. Directo y convincente, con la voz personal de Maria.`,
-      casual:       `Texto divulgativo. Accesible y fluido, con ejemplos concretos y la voz personal de Maria.`,
+      academic:     `Texto academico con norma APA 7. Tercera persona preferente. Conserva citas en formato (Autor, año). Lenguaje riguroso con voz personal.`,
+      professional: `Texto profesional/empresarial. Directo y convincente con voz personal.`,
+      casual:       `Texto divulgativo. Accesible y fluido con ejemplos concretos.`,
     };
 
     const profNote = profession && professionInstructions[profession]
@@ -79,48 +75,41 @@ export async function POST(request) {
       : '';
 
     const contextNote = (modeInstructions[mode] || modeInstructions.academic) + profNote;
-    // Pasada 99 = modo anti-detector final
+
     const isAntiDetector = pass === 99;
     const passNote = isAntiDetector
-      ? `MODO ANTI-DETECTOR FINAL: El texto ya fue humanizado. Aplica TODOS estos cambios quirurgicos sin excepcion:\n1. ROMPE LA UNIFORMIDAD: localiza cualquier grupo de 2 oraciones seguidas de longitud similar y corta una a menos de 6 palabras. Brutal si hace falta.\n2. ARRANCA DIFERENTE: cambia el inicio de 3 oraciones para que empiecen con "Y ", "Pero ", "Pues bien," o "Asi que ".\n3. METE RUIDO HUMANO: agrega entre 2 y 3 aclaraciones entre parentesis en distintos parrafos, en mitad de oracion si es posible.\n4. VOCABULARIO INESPERADO: reemplaza 6 palabras predecibles por sinonimos que nadie esperaria pero que son correctos. Busca las palabras mas "seguras" y cambialas.\n5. FUSIONA Y PARTE: en cada parrafo de mas de 3 oraciones, une las dos mas cortas con punto y coma; parte la mas larga en dos con punto seguido.\n6. REACCION PERSONAL: en al menos un parrafo inserta una frase de reaccion: "lo cual resulta, cuanto menos, curioso", "cosa nada menor", "y eso tiene su peso".\n7. PARRAFO SOLITARIO: si no hay ningun parrafo de 1 sola oracion, convierte la oracion mas llamativa de cualquier parrafo en su propio parrafo.\n8. NO cambies hechos, cifras, citas ni el argumento central. Solo la forma.\n\n`
+      ? `MODO ANTI-DETECTOR FINAL: Aplica TODOS estos cambios quirurgicos:\n1. Corta una oracion de cada grupo similar a menos de 6 palabras.\n2. Empieza 3 oraciones con "Y ", "Pero ", "Pues bien," o "Asi que ".\n3. Agrega 2-3 aclaraciones entre parentesis en distintos parrafos.\n4. Reemplaza 6 palabras predecibles por sinonimos inesperados pero correctos.\n5. Une las dos oraciones mas cortas de cada parrafo con punto y coma; parte la mas larga en dos.\n6. Inserta una frase de reaccion personal en algun parrafo.\n7. Si no hay parrafo de 1 sola oracion, crea uno con la idea mas llamativa.\n8. NO cambies hechos, cifras ni el argumento central.\n\n`
       : passes > 1
-      ? `IMPORTANTE: Esta es la pasada ${pass + 1} de ${passes}. Usa vocabulario y estructura completamente diferentes a una reescritura anterior.\n\n`
+      ? `IMPORTANTE: Esta es la pasada ${pass + 1} de ${passes}. Usa vocabulario y estructura completamente diferentes.\n\n`
       : '';
+
     const chunkNote = total > 1 ? `Fragmento ${index + 1} de ${total}.\n\n` : '';
 
-    const message = await client.messages.create({
-      model:      MODEL,
-      max_tokens: 4096,
-      system:     SYSTEM_PROMPT,
-      messages: [
-        {
-          role:    'user',
-          content: `Modo: ${contextNote}\n\n${passNote}${chunkNote}Texto a transformar con tu voz:\n\n${chunk}`,
-        },
-      ],
+    const prompt = `Modo: ${contextNote}\n\n${passNote}${chunkNote}Texto a transformar con tu voz:\n\n${chunk}`;
+
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-1.5-flash',
+      systemInstruction: SYSTEM_PROMPT,
+      generationConfig: { maxOutputTokens: 4096, temperature: 0.9 },
     });
 
-    let result = message.content
-      .filter(b => b.type === 'text')
-      .map(b => b.text)
-      .join('');
+    const response = await model.generateContent(prompt);
+    let result = response.response.text();
 
-    // Post-procesado: elimina guiones largos/cortos usados como puntuacion
     result = result
-      .replace(/ — /g, ', ')
-      .replace(/ – /g, ', ')
-      .replace(/—/g, ', ')
-      .replace(/–/g, ', ');
+      .replace(/ — /g, ', ').replace(/ – /g, ', ')
+      .replace(/—/g, ', ').replace(/–/g, ', ')
+      .replace(/\*\*(.+?)\*\*/g, '$1').replace(/\*(.+?)\*/g, '$1').replace(/\*/g, '');
 
     return NextResponse.json({ result, index });
   } catch (err) {
     console.error('[/api/humanize]', err);
 
-    if (err.status === 401) {
-      return NextResponse.json({ error: 'API Key invalida. Verifica ANTHROPIC_API_KEY.' }, { status: 401 });
+    if (err.status === 429 || err.message?.includes('quota')) {
+      return NextResponse.json({ error: 'Limite de solicitudes alcanzado. Espera un momento e intenta de nuevo.' }, { status: 429 });
     }
-    if (err.status === 429) {
-      return NextResponse.json({ error: 'Limite de tasa excedido. Intenta en unos segundos.' }, { status: 429 });
+    if (err.status === 400 && err.message?.includes('API_KEY')) {
+      return NextResponse.json({ error: 'GEMINI_API_KEY invalida.' }, { status: 401 });
     }
 
     return NextResponse.json(
