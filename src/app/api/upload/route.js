@@ -1,10 +1,5 @@
 import { NextResponse } from 'next/server';
 import { extractText } from '@/lib/fileParser';
-
-export const config = {
-  api: { bodyParser: false },
-};
-
 export async function POST(request) {
   try {
     const formData = await request.formData();
