@@ -124,34 +124,56 @@ export async function POST(request) {
 
     const prompt = `Modo: ${contextNote}\n\n${passNote}${chunkNote}Texto a transformar con tu voz:\n\n${chunk}`;
 
-    let result = '';
-
     const systemToUse = isAntiDetector ? SYSTEM_PROMPT_ANTIDETECTOR : SYSTEM_PROMPT_QUALITY;
 
-    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        messages: [
-          { role: 'system', content: systemToUse },
-          { role: 'user',   content: prompt },
-        ],
-        max_tokens: 4096,
-        temperature: 0.9,
-      }),
+    const payload = JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      messages: [
+        { role: 'system', content: systemToUse },
+        { role: 'user',   content: prompt },
+      ],
+      max_tokens: 4096,
+      temperature: 0.9,
     });
 
-    if (!groqRes.ok) {
-      const errData = await groqRes.json().catch(() => ({}));
-      throw new Error(errData?.error?.message || `HTTP ${groqRes.status}`);
-    }
+    let result = '';
+    const MAX_RETRIES = 4;
 
-    const groqData = await groqRes.json();
-    result = groqData.choices?.[0]?.message?.content || '';
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+        },
+        body: payload,
+      });
+
+      if (groqRes.status === 429) {
+        if (attempt === MAX_RETRIES) {
+          return NextResponse.json(
+            { error: 'Límite de solicitudes alcanzado tras varios intentos. Espera un minuto e intenta de nuevo.' },
+            { status: 429 }
+          );
+        }
+        const errData = await groqRes.json().catch(() => ({}));
+        const msg = errData?.error?.message || '';
+        const match = msg.match(/try again in ([0-9.]+)s/);
+        const waitMs = match ? Math.ceil(parseFloat(match[1]) * 1000) + 500 : (attempt + 1) * 15000;
+        console.log(`[/api/humanize] Rate limit, esperando ${waitMs}ms (intento ${attempt + 1}/${MAX_RETRIES})`);
+        await new Promise(r => setTimeout(r, waitMs));
+        continue;
+      }
+
+      if (!groqRes.ok) {
+        const errData = await groqRes.json().catch(() => ({}));
+        throw new Error(errData?.error?.message || `HTTP ${groqRes.status}`);
+      }
+
+      const groqData = await groqRes.json();
+      result = groqData.choices?.[0]?.message?.content || '';
+      break;
+    }
 
     result = result
       .replace(/ — /g, ', ').replace(/ – /g, ', ')
@@ -161,10 +183,6 @@ export async function POST(request) {
     return NextResponse.json({ result, index });
   } catch (err) {
     console.error('[/api/humanize]', err);
-
-    if (err.status === 429 || err.message?.includes('rate_limit')) {
-      return NextResponse.json({ error: 'Límite de solicitudes alcanzado. Espera un momento e intenta de nuevo.' }, { status: 429 });
-    }
 
     return NextResponse.json(
       { error: err.message || 'Error interno del servidor' },
