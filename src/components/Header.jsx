@@ -1,8 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 
-const GOLD   = 'linear-gradient(90deg, #F59E0B, #FBBF24)';
-const PURPLE = 'linear-gradient(135deg, #7C3AED, #C026D3)';
+const GOLD = 'linear-gradient(90deg, #F59E0B, #FBBF24)';
 
 export default function Header({ activeTab, onTabChange }) {
   const [dark, setDark]         = useState(true);
@@ -64,13 +63,13 @@ export default function Header({ activeTab, onTabChange }) {
             }}/>
           </div>
           <div className="flex flex-col leading-none">
-            <span className="font-black text-sm tracking-tight text-white" style={{ lineHeight:1.2 }}>
+            <span className="font-black text-xs tracking-tight text-white" style={{ lineHeight:1.2 }}>
               Aprendiendo con{' '}
               <span style={{ background:GOLD, WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text', fontStyle:'italic' }}>
                 Maclao
               </span>
             </span>
-            <span className="text-xs" style={{ color:'rgba(245,230,255,0.5)' }}>
+            <span style={{ fontSize:'0.65rem', color:'rgba(245,230,255,0.5)' }}>
               Conocimiento que inspira · Humanizador IA
             </span>
           </div>
@@ -78,14 +77,14 @@ export default function Header({ activeTab, onTabChange }) {
 
         {/* Tabs */}
         <nav className="flex items-center gap-1 p-1 rounded-xl"
-             style={{ background:'rgba(124,58,237,0.2)', border:'1px solid rgba(192,38,211,0.3)' }}>
+             style={{ background:'rgba(155,114,207,0.2)', border:'1px solid rgba(192,38,211,0.3)' }}>
           {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className="px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200"
+              className="px-4 py-1.5 rounded-lg text-sm font-bold transition-all duration-200"
               style={{
-                background: activeTab === tab.id ? 'rgba(124,58,237,0.5)' : 'transparent',
+                background: activeTab === tab.id ? 'rgba(155,114,207,0.5)' : 'transparent',
                 color:      activeTab === tab.id ? '#F5E6FF' : 'rgba(245,230,255,0.5)',
                 boxShadow:  activeTab === tab.id ? '0 1px 4px rgba(0,0,0,0.3)' : 'none',
               }}
@@ -100,7 +99,7 @@ export default function Header({ activeTab, onTabChange }) {
           <button
             onClick={toggleTheme}
             className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:scale-105"
-            style={{ background:'rgba(124,58,237,0.25)', border:'1px solid rgba(192,38,211,0.3)', color:'rgba(245,230,255,0.7)' }}
+            style={{ background:'rgba(155,114,207,0.25)', border:'1px solid rgba(192,38,211,0.3)', color:'rgba(245,230,255,0.7)' }}
             title={dark ? 'Modo claro' : 'Modo oscuro'}
           >
             {dark ? (

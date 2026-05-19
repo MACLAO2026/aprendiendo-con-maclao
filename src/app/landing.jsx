@@ -48,7 +48,7 @@ const FEATURES = [
 ];
 
 const GOLD   = 'linear-gradient(90deg, #F59E0B, #FBBF24)';
-const PURPLE = 'linear-gradient(135deg, #7C3AED, #C026D3)';
+const PURPLE = 'linear-gradient(135deg, #9B72CF, #C026D3)';
 
 export default function Landing({ onEnterApp }) {
   const [openFaq, setOpenFaq] = useState(null);
@@ -84,7 +84,7 @@ export default function Landing({ onEnterApp }) {
               </defs>
             </svg>
             <div className="leading-none">
-              <div className="font-black text-base text-white">
+              <div className="font-black text-sm text-white">
                 Aprendiendo con{' '}
                 <span style={{ background: GOLD, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', fontStyle: 'italic' }}>
                   Maclao
@@ -94,7 +94,7 @@ export default function Landing({ onEnterApp }) {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <a href="#precios" className="hidden sm:block text-sm font-medium" style={{ color: 'rgba(245,230,255,0.6)' }}>Precios</a>
+            <a href="#precios" className="hidden sm:block text-sm font-bold" style={{ color: 'rgba(245,230,255,0.6)' }}>Precios</a>
             <button onClick={onEnterApp}
                     className="px-5 py-2 rounded-xl text-sm font-bold text-white transition-all hover:scale-105"
                     style={{ background: PURPLE, boxShadow: '0 0 16px rgba(192,38,211,0.4)' }}>
@@ -106,23 +106,23 @@ export default function Landing({ onEnterApp }) {
 
       {/* ── Hero ── */}
       <section style={{ position: 'relative', overflow: 'hidden', padding: '80px 16px 60px' }}>
-        <div style={{ position:'absolute', top:'-80px', left:'50%', transform:'translateX(-50%)', width:600, height:400, borderRadius:'50%', pointerEvents:'none', background:'radial-gradient(ellipse, rgba(124,58,237,0.35) 0%, transparent 70%)', filter:'blur(40px)' }}/>
+        <div style={{ position:'absolute', top:'-80px', left:'50%', transform:'translateX(-50%)', width:600, height:400, borderRadius:'50%', pointerEvents:'none', background:'radial-gradient(ellipse, rgba(155,114,207,0.35) 0%, transparent 70%)', filter:'blur(40px)' }}/>
         <div style={{ position:'absolute', top:40, right:'5%', width:280, height:280, borderRadius:'50%', pointerEvents:'none', background:'radial-gradient(ellipse, rgba(192,38,211,0.2) 0%, transparent 70%)', filter:'blur(30px)' }}/>
         <div style={{ position:'absolute', bottom:0, left:'5%', width:220, height:220, borderRadius:'50%', pointerEvents:'none', background:'radial-gradient(ellipse, rgba(245,158,11,0.12) 0%, transparent 70%)', filter:'blur(25px)' }}/>
 
         <div className="max-w-4xl mx-auto text-center" style={{ position:'relative' }}>
-          <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full text-sm font-semibold"
-               style={{ background:'rgba(124,58,237,0.25)', border:'1px solid rgba(192,38,211,0.4)', color:'#E879F9' }}>
-            <span className="w-2 h-2 rounded-full animate-pulse" style={{ background:'#E879F9' }}/>
-            Aprender hoy, Liderar Mañana ⭐
+          <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full text-sm font-bold"
+               style={{ background:'rgba(245,158,11,0.15)', border:'1px solid rgba(245,158,11,0.5)', color:'#FBBF24' }}>
+            <span className="w-2 h-2 rounded-full animate-pulse" style={{ background:'#FBBF24' }}/>
+            Humanizador de Textos con IA — 0% detección en Turnitin
           </div>
 
           <h1 className="font-black tracking-tight mb-4 leading-tight"
               style={{ fontSize: 'clamp(2.2rem, 6vw, 4rem)', color: 'white' }}>
-            Conocimiento que{' '}
-            <span style={{ background: GOLD, WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' }}>INSPIRA</span>
-            ,<br/>acciones que{' '}
-            <span style={{ background: GOLD, WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' }}>TRANSFORMAN</span>
+            Tu texto suena a IA.{' '}
+            <span style={{ background: GOLD, WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' }}>Nosotros</span>
+            <br/>lo convertimos en{' '}
+            <span style={{ background: GOLD, WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' }}>humano.</span>
           </h1>
 
           <p className="text-base sm:text-lg max-w-2xl mx-auto mb-8 leading-relaxed"
@@ -139,7 +139,7 @@ export default function Landing({ onEnterApp }) {
             </button>
             <a href="#precios"
                className="w-full sm:w-auto px-8 py-4 rounded-2xl text-base font-semibold text-center transition-all hover:scale-105"
-               style={{ border:'1px solid rgba(192,38,211,0.45)', color:'rgba(245,230,255,0.8)', background:'rgba(124,58,237,0.12)' }}>
+               style={{ border:'1px solid rgba(192,38,211,0.45)', color:'rgba(245,230,255,0.8)', background:'rgba(155,114,207,0.12)' }}>
               Ver planes y precios
             </a>
           </div>
@@ -154,7 +154,7 @@ export default function Landing({ onEnterApp }) {
         <div className="grid grid-cols-4 gap-3">
           {PILLARS.map(p => (
             <div key={p.label} className="flex flex-col items-center gap-2 py-5 px-2 rounded-2xl text-center transition-all hover:scale-105"
-                 style={{ background:'rgba(124,58,237,0.18)', border:'1px solid rgba(192,38,211,0.3)' }}>
+                 style={{ background:'rgba(155,114,207,0.18)', border:'1px solid rgba(192,38,211,0.3)' }}>
               <span className="text-3xl">{p.icon}</span>
               <span className="text-xs font-bold tracking-wide" style={{ color:'#E879F9' }}>{p.label}</span>
             </div>
@@ -174,7 +174,7 @@ export default function Landing({ onEnterApp }) {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {FEATURES.map((f, i) => (
             <div key={i} className="p-6 rounded-2xl transition-all hover:scale-[1.02]"
-                 style={{ background:'rgba(124,58,237,0.14)', border:'1px solid rgba(192,38,211,0.25)' }}>
+                 style={{ background:'rgba(155,114,207,0.14)', border:'1px solid rgba(192,38,211,0.25)' }}>
               <div className="text-3xl mb-3">{f.icon}</div>
               <h3 className="font-bold mb-2 text-white">{f.title}</h3>
               <p className="text-sm leading-relaxed" style={{ color:'rgba(245,230,255,0.6)' }}>{f.desc}</p>
@@ -190,7 +190,7 @@ export default function Landing({ onEnterApp }) {
         <div className="grid sm:grid-cols-3 gap-6">
           {PLANS.map((plan, i) => (
             <div key={i} className="p-7 rounded-2xl flex flex-col transition-all hover:scale-[1.02]"
-                 style={{ position:'relative', background: plan.highlight ? 'rgba(124,58,237,0.28)' : 'rgba(124,58,237,0.12)', border:`1px solid ${plan.highlight ? '#C026D3' : 'rgba(192,38,211,0.25)'}`, boxShadow: plan.highlight ? '0 0 32px rgba(192,38,211,0.3)' : 'none' }}>
+                 style={{ position:'relative', background: plan.highlight ? 'rgba(155,114,207,0.28)' : 'rgba(155,114,207,0.12)', border:`1px solid ${plan.highlight ? '#C026D3' : 'rgba(192,38,211,0.25)'}`, boxShadow: plan.highlight ? '0 0 32px rgba(192,38,211,0.3)' : 'none' }}>
               {plan.highlight && (
                 <div style={{ position:'absolute', top:-14, left:'50%', transform:'translateX(-50%)' }}>
                   <span className="px-4 py-1 rounded-full text-xs font-bold"
@@ -214,7 +214,7 @@ export default function Landing({ onEnterApp }) {
               </ul>
               <button onClick={onEnterApp}
                       className="py-3 rounded-xl text-sm font-bold text-white transition-all hover:brightness-110 hover:scale-105"
-                      style={{ background: plan.highlight ? PURPLE : 'rgba(124,58,237,0.35)', border: plan.highlight ? 'none' : '1px solid rgba(192,38,211,0.4)' }}>
+                      style={{ background: plan.highlight ? PURPLE : 'rgba(155,114,207,0.35)', border: plan.highlight ? 'none' : '1px solid rgba(192,38,211,0.4)' }}>
                 {plan.cta}
               </button>
             </div>
@@ -228,7 +228,7 @@ export default function Landing({ onEnterApp }) {
         <div className="space-y-3">
           {faqs.map((faq, i) => (
             <div key={i} className="rounded-2xl overflow-hidden"
-                 style={{ background:'rgba(124,58,237,0.14)', border:'1px solid rgba(192,38,211,0.25)' }}>
+                 style={{ background:'rgba(155,114,207,0.14)', border:'1px solid rgba(192,38,211,0.25)' }}>
               <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
                       className="w-full px-6 py-4 text-left flex items-center justify-between gap-3">
                 <span className="font-semibold text-sm text-white">{faq.q}</span>
@@ -245,7 +245,7 @@ export default function Landing({ onEnterApp }) {
       {/* ── Pago ── */}
       <section className="max-w-2xl mx-auto px-4 py-8">
         <div className="p-8 rounded-2xl text-center"
-             style={{ background:'rgba(124,58,237,0.18)', border:'1px solid #C026D3', boxShadow:'0 0 32px rgba(192,38,211,0.2)' }}>
+             style={{ background:'rgba(155,114,207,0.18)', border:'1px solid #C026D3', boxShadow:'0 0 32px rgba(192,38,211,0.2)' }}>
           <h2 className="text-xl font-bold mb-2 text-white">¿Cómo pagar?</h2>
           <p className="text-sm mb-6" style={{ color:'rgba(245,230,255,0.6)' }}>Escríbenos por WhatsApp y te confirmamos el plan activado.</p>
           <div className="inline-block mb-6 px-8 py-4 rounded-2xl"

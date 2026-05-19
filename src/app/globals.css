@@ -24,7 +24,7 @@
   --bg:        #0D0020;
   --surface:   #160030;
   --card:      #1E0040;
-  --border:    #7C3AED;
+  --border:    #9B72CF;
   --text:      #F5E6FF;
   --muted:     #C084FC;
   --accent:    #E879F9;
@@ -138,7 +138,7 @@ body::before {
     @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold;
   }
   .badge-mint   { background: rgba(217,70,239,0.12); color: #D946EF; }
-  .badge-cobalt { background: rgba(168,85,247,0.12); color: #A855F7; }
+  .badge-cobalt { background: rgba(155,114,207,0.15); color: #9B72CF; }
   .badge-muted  { background: var(--border); color: var(--muted); }
 
   /* shimmer skeleton */

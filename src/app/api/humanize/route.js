@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import Anthropic from '@anthropic-ai/sdk';
 
 const SYSTEM_PROMPT = `Eres un escritor academico colombiano con doctorado, con mas de 20 anos redactando articulos, tesis e informes institucionales. Cuando recibes un texto, lo reescribes completamente con tu voz: clara, rigorosa, directa y con matices propios de quien lleva anos pensando en el tema. No sigues plantillas. Piensas el argumento y lo expresas como lo harias tu.
 
@@ -27,6 +28,8 @@ REGLAS ABSOLUTAS:
 5. Devuelve UNICAMENTE el texto reescrito. Cero comentarios, cero explicaciones, cero encabezados.
 6. Respeta los saltos de parrafo del original.`;
 
+const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
 export async function POST(request) {
   try {
     const body = await request.json();
@@ -36,9 +39,9 @@ export async function POST(request) {
       return NextResponse.json({ error: 'chunk invalido' }, { status: 400 });
     }
 
-    if (!process.env.GROQ_API_KEY) {
+    if (!process.env.ANTHROPIC_API_KEY) {
       return NextResponse.json(
-        { error: 'GROQ_API_KEY no esta configurada en .env.local' },
+        { error: 'ANTHROPIC_API_KEY no esta configurada en .env.local' },
         { status: 500 }
       );
     }
@@ -79,30 +82,15 @@ export async function POST(request) {
 
     const prompt = `Modo: ${contextNote}\n\n${passNote}${chunkNote}Texto a transformar con tu voz:\n\n${chunk}`;
 
-    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user',   content: prompt },
-        ],
-        max_tokens: 4096,
-        temperature: 0.9,
-      }),
+    const message = await client.messages.create({
+      model: 'claude-sonnet-4-5',
+      max_tokens: 4096,
+      temperature: 1,
+      system: SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: prompt }],
     });
 
-    if (!groqRes.ok) {
-      const errData = await groqRes.json().catch(() => ({}));
-      throw new Error(errData?.error?.message || `HTTP ${groqRes.status}`);
-    }
-
-    const groqData = await groqRes.json();
-    let result = groqData.choices?.[0]?.message?.content || '';
+    let result = message.content?.[0]?.text || '';
 
     result = result
       .replace(/ — /g, ', ').replace(/ – /g, ', ')
@@ -113,7 +101,7 @@ export async function POST(request) {
   } catch (err) {
     console.error('[/api/humanize]', err);
 
-    if (err.message?.includes('429') || err.message?.includes('rate_limit')) {
+    if (err.status === 429 || err.message?.includes('rate_limit')) {
       return NextResponse.json({ error: 'Límite de solicitudes alcanzado. Espera un momento e intenta de nuevo.' }, { status: 429 });
     }
 

@@ -101,25 +101,25 @@ export default function Home() {
         {/* ── Hero ─────────────────────────────────────────────────── */}
         {activeTab === 'editor' && !inputText && (
           <div className="text-center mb-10 animate-slide-up">
-            <div className="inline-flex items-center gap-2 badge badge-mint mb-4">
-              <span className="w-1.5 h-1.5 rounded-full bg-mint-500 animate-pulse"/>
-              Powered by Claude AI
+            <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full text-sm font-bold"
+                 style={{ background:'rgba(245,158,11,0.15)', border:'1px solid rgba(245,158,11,0.5)', color:'#FBBF24' }}>
+              <span className="w-2 h-2 rounded-full animate-pulse" style={{ background:'#FBBF24' }}/>
+              Humanizador de Textos con IA — 0% detección en Turnitin
             </div>
             <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4"
                 style={{ color: 'var(--text)' }}>
-              Textos que{' '}
+              Tu texto suena a IA.{' '}
               <span style={{
-                background: 'linear-gradient(135deg, #D946EF, #A855F7)',
+                background: 'linear-gradient(90deg, #F59E0B, #FBBF24)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
               }}>
-                suenan humanos
+                Nosotros lo hacemos humano.
               </span>
             </h1>
             <p className="text-lg max-w-xl mx-auto" style={{ color: 'var(--muted)' }}>
-              Transforma textos generados por IA en prosa fluida, natural y académicamente impecable.
-              Soporta documentos de más de 20.000 palabras.
+              Pega tu texto, elige tu área y humanizamos todo — norma APA 7, exportación a Word y PDF incluidos.
             </p>
           </div>
         )}
@@ -164,7 +164,7 @@ export default function Home() {
                     className="w-10 h-10 rounded-xl font-bold text-sm transition-all duration-200
                                hover:scale-105 disabled:opacity-50"
                     style={{
-                      background: passes === n ? 'linear-gradient(135deg, #D946EF, #A855F7)' : 'var(--card)',
+                      background: passes === n ? 'linear-gradient(135deg, #D946EF, #9B72CF)' : 'var(--card)',
                       color:      passes === n ? '#FFFFFF' : 'var(--muted)',
                       border:     `1px solid ${passes === n ? '#D946EF' : 'var(--border)'}`,
                     }}
@@ -192,7 +192,7 @@ export default function Home() {
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium
                                transition-all duration-200 hover:scale-105 disabled:opacity-50"
                     style={{
-                      background: profession === p.id ? 'linear-gradient(135deg, #D946EF, #A855F7)' : 'var(--card)',
+                      background: profession === p.id ? 'linear-gradient(135deg, #D946EF, #9B72CF)' : 'var(--card)',
                       color:      profession === p.id ? '#FFFFFF' : 'var(--muted)',
                       border:     `1px solid ${profession === p.id ? '#D946EF' : 'var(--border)'}`,
                     }}
