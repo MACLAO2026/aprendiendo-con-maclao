@@ -88,15 +88,43 @@ export async function POST(request) {
 
     const prompt = `Modo: ${contextNote}\n\n${passNote}${chunkNote}Texto a transformar con tu voz:\n\n${chunk}`;
 
-    const message = await client.messages.create({
-      model: 'claude-sonnet-4-5',
-      max_tokens: 4096,
-      temperature: 1,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: prompt }],
-    });
+    let result = '';
 
-    let result = message.content?.[0]?.text || '';
+    if (isAntiDetector) {
+      // Pasada anti-detector: usar Groq/Llama que evade mejor los detectores
+      const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'user',   content: prompt },
+          ],
+          max_tokens: 4096,
+          temperature: 1.0,
+        }),
+      });
+      if (!groqRes.ok) {
+        const errData = await groqRes.json().catch(() => ({}));
+        throw new Error(errData?.error?.message || `Groq HTTP ${groqRes.status}`);
+      }
+      const groqData = await groqRes.json();
+      result = groqData.choices?.[0]?.message?.content || '';
+    } else {
+      // Pasadas normales: usar Claude para mayor calidad
+      const message = await client.messages.create({
+        model: 'claude-sonnet-4-5',
+        max_tokens: 4096,
+        temperature: 1,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: 'user', content: prompt }],
+      });
+      result = message.content?.[0]?.text || '';
+    }
 
     result = result
       .replace(/ — /g, ', ').replace(/ – /g, ', ')
