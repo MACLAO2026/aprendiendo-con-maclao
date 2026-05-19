@@ -91,28 +91,34 @@ export async function POST(request) {
     let result = '';
 
     if (isAntiDetector) {
-      // Pasada anti-detector: usar Groq/Llama que evade mejor los detectores
-      const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          messages: [
-            { role: 'system', content: SYSTEM_PROMPT },
-            { role: 'user',   content: prompt },
-          ],
-          max_tokens: 4096,
-          temperature: 1.0,
-        }),
-      });
-      if (!groqRes.ok) {
+      // Pasada anti-detector: usar Groq/Llama con reintentos por TPM
+      let groqData = null;
+      for (let attempt = 0; attempt < 4; attempt++) {
+        if (attempt > 0) await new Promise(r => setTimeout(r, attempt * 8000));
+        const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: 'llama-3.3-70b-versatile',
+            messages: [
+              { role: 'system', content: SYSTEM_PROMPT },
+              { role: 'user',   content: prompt },
+            ],
+            max_tokens: 4096,
+            temperature: 1.0,
+          }),
+        });
+        if (groqRes.ok) { groqData = await groqRes.json(); break; }
         const errData = await groqRes.json().catch(() => ({}));
-        throw new Error(errData?.error?.message || `Groq HTTP ${groqRes.status}`);
+        const msg = errData?.error?.message || '';
+        if (!msg.includes('rate_limit') && !msg.includes('429')) {
+          throw new Error(msg || `Groq HTTP ${groqRes.status}`);
+        }
       }
-      const groqData = await groqRes.json();
+      if (!groqData) throw new Error('Límite de Groq alcanzado. Intenta de nuevo en 1 minuto.');
       result = groqData.choices?.[0]?.message?.content || '';
     } else {
       // Pasadas normales: usar Claude para mayor calidad
