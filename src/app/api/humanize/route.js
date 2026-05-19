@@ -79,7 +79,7 @@ export async function POST(request) {
 
     const isAntiDetector = pass === 99;
     const passNote = isAntiDetector
-      ? `MODO ANTI-DETECTOR FINAL: Aplica TODOS estos cambios quirurgicos:\n1. Corta una oracion de cada grupo similar a menos de 6 palabras.\n2. Empieza 3 oraciones con "Y ", "Pero ", "Pues bien," o "Asi que ".\n3. Agrega 2-3 aclaraciones entre parentesis en distintos parrafos.\n4. Reemplaza 6 palabras predecibles por sinonimos inesperados pero correctos.\n5. Une las dos oraciones mas cortas de cada parrafo con punto y coma; parte la mas larga en dos.\n6. Inserta una frase de reaccion personal en algun parrafo.\n7. Si no hay parrafo de 1 sola oracion, crea uno con la idea mas llamativa.\n8. NO cambies hechos, cifras ni el argumento central.\n\n`
+      ? `MODO ANTI-DETECTOR FINAL — MAXIMA IRREGULARIDAD:\nEste texto sera analizado por Compilatio y Turnitin. Debes hacer que sea IMPOSIBLE de detectar como IA. Aplica TODOS estos cambios sin excepcion:\n1. En cada parrafo incluye AL MENOS UNA oracion de menos de 5 palabras. Sola. Contundente.\n2. En cada parrafo incluye AL MENOS UNA oracion de mas de 40 palabras con dos subordinadas.\n3. Cambia el orden sintactico de al menos 3 oraciones: pon el verbo antes del sujeto, o empieza con el complemento.\n4. Reemplaza 8 palabras predecibles por sinonimos poco comunes pero correctos academicamente.\n5. Agrega 2 parentesis espontaneos con aclaraciones que rompan el ritmo del parrafo.\n6. En algun parrafo incluye una digresion breve de opinion personal del autor (1 oracion).\n7. Parte el parrafo mas largo en dos. Une los dos mas cortos en uno.\n8. Usa punto y coma en al menos 2 oraciones que actualmente estan separadas por punto.\n9. NO cambies hechos, cifras, citas ni argumentos centrales.\n\n`
       : passes > 1
       ? `IMPORTANTE: Esta es la pasada ${pass + 1} de ${passes}. Usa vocabulario y estructura completamente diferentes.\n\n`
       : '';
@@ -90,47 +90,14 @@ export async function POST(request) {
 
     let result = '';
 
-    if (isAntiDetector) {
-      // Pasada anti-detector: usar Groq/Llama con reintentos por TPM
-      let groqData = null;
-      for (let attempt = 0; attempt < 4; attempt++) {
-        if (attempt > 0) await new Promise(r => setTimeout(r, attempt * 8000));
-        const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-          },
-          body: JSON.stringify({
-            model: 'llama-3.3-70b-versatile',
-            messages: [
-              { role: 'system', content: SYSTEM_PROMPT },
-              { role: 'user',   content: prompt },
-            ],
-            max_tokens: 4096,
-            temperature: 1.0,
-          }),
-        });
-        if (groqRes.ok) { groqData = await groqRes.json(); break; }
-        const errData = await groqRes.json().catch(() => ({}));
-        const msg = errData?.error?.message || '';
-        if (!msg.includes('rate_limit') && !msg.includes('429')) {
-          throw new Error(msg || `Groq HTTP ${groqRes.status}`);
-        }
-      }
-      if (!groqData) throw new Error('Límite de Groq alcanzado. Intenta de nuevo en 1 minuto.');
-      result = groqData.choices?.[0]?.message?.content || '';
-    } else {
-      // Pasadas normales: usar Claude para mayor calidad
-      const message = await client.messages.create({
-        model: 'claude-sonnet-4-5',
-        max_tokens: 4096,
-        temperature: 1,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: prompt }],
-      });
-      result = message.content?.[0]?.text || '';
-    }
+    const message = await client.messages.create({
+      model: 'claude-sonnet-4-5',
+      max_tokens: 4096,
+      temperature: 1,
+      system: SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: prompt }],
+    });
+    result = message.content?.[0]?.text || '';
 
     result = result
       .replace(/ — /g, ', ').replace(/ – /g, ', ')
