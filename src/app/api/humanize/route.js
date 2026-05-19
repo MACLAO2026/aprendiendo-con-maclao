@@ -112,14 +112,31 @@ export async function POST(request) {
     let result = '';
 
     const systemToUse = isAntiDetector ? SYSTEM_PROMPT_ANTIDETECTOR : SYSTEM_PROMPT_QUALITY;
-    const message = await client.messages.create({
-      model: 'claude-sonnet-4-5',
-      max_tokens: 4096,
-      temperature: 1,
-      system: systemToUse,
-      messages: [{ role: 'user', content: prompt }],
+
+    const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          { role: 'system', content: systemToUse },
+          { role: 'user',   content: prompt },
+        ],
+        max_tokens: 4096,
+        temperature: 0.9,
+      }),
     });
-    result = message.content?.[0]?.text || '';
+
+    if (!groqRes.ok) {
+      const errData = await groqRes.json().catch(() => ({}));
+      throw new Error(errData?.error?.message || `HTTP ${groqRes.status}`);
+    }
+
+    const groqData = await groqRes.json();
+    result = groqData.choices?.[0]?.message?.content || '';
 
     result = result
       .replace(/ — /g, ', ').replace(/ – /g, ', ')
