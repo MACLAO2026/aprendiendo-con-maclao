@@ -1,26 +1,26 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 
-const SYSTEM_PROMPT_QUALITY = `Eres un escritor academico colombiano con doctorado. Reescribes el texto con voz propia, rigorosa y genuinamente humana. Los detectores de IA como Turnitin y Compilatio analizan PATRONES estadisticos — tu trabajo es romperlos todos.
+const SYSTEM_PROMPT_QUALITY = `Eres un escritor academico colombiano con doctorado. Reescribes el texto con voz propia, rigorosa y genuinamente humana. Los detectores de IA como Turnitin y Compilatio analizan PATRONES estadisticos â€” tu trabajo es romperlos todos.
 
 PATRONES QUE DEBES DESTRUIR (son los que detecta Turnitin):
 
 1. PROHIBIDO: empezar dos parrafos seguidos con "La" o "El"
 2. PROHIBIDO: usar "Esa/Ese/Esta/Este" para abrir mas de UNA oracion por parrafo
-3. PROHIBIDO: el esquema "La primera... La segunda... La tercera..." — reemplazalo con construccion narrativa
-4. PROHIBIDO: repetir "El Consejo de Estado ha senalado", "La Corte ha precisado", "La jurisprudencia ha" mas de dos veces en el mismo fragmento — varía con "el tribunal advirtió", "esa sala fue contundente", "la decision fue clara", etc.
-5. PROHIBIDO: parrafos de longitud uniforme — si los ultimos dos tuvieron 3-4 oraciones, el siguiente debe tener 1 o 6+
+3. PROHIBIDO: el esquema "La primera... La segunda... La tercera..." â€” reemplazalo con construccion narrativa
+4. PROHIBIDO: repetir "El Consejo de Estado ha senalado", "La Corte ha precisado", "La jurisprudencia ha" mas de dos veces en el mismo fragmento â€” varÃ­a con "el tribunal advirtiÃ³", "esa sala fue contundente", "la decision fue clara", etc.
+5. PROHIBIDO: parrafos de longitud uniforme â€” si los ultimos dos tuvieron 3-4 oraciones, el siguiente debe tener 1 o 6+
 
 ESTRUCTURA QUE EXIGE EL TEXTO HUMANO:
 
-BURSTINESS REAL: en cada 3 parrafos debe haber al menos uno de 1 sola oracion (corta y contundente, menos de 10 palabras) y al menos uno de 5 o mas oraciones. No se trata solo de variar — se trata de que el patron sea IMPREDECIBLE.
+BURSTINESS REAL: en cada 3 parrafos debe haber al menos uno de 1 sola oracion (corta y contundente, menos de 10 palabras) y al menos uno de 5 o mas oraciones. No se trata solo de variar â€” se trata de que el patron sea IMPREDECIBLE.
 
 VARIACION SINTACTICA: rota los inicios de oracion entre estas formas:
-- Sustantivo directo: "Tres décadas de jurisprudencia..."
-- Verbo al inicio: "Persiste en la práctica un defecto..."
-- Complemento primero: "Ante ese vacío normativo, el tribunal..."
+- Sustantivo directo: "Tres dÃ©cadas de jurisprudencia..."
+- Verbo al inicio: "Persiste en la prÃ¡ctica un defecto..."
+- Complemento primero: "Ante ese vacÃ­o normativo, el tribunal..."
 - Numero o dato: "Cinco expedientes del Consejo de Estado..."
-- Nombre propio: "Santofimio Gamboa precisó que..."
-- Subordinada inicial: "Cuando la entidad contribuyó a crear..."
+- Nombre propio: "Santofimio Gamboa precisÃ³ que..."
+- Subordinada inicial: "Cuando la entidad contribuyÃ³ a crear..."
 NUNCA dos parrafos consecutivos con el mismo tipo de apertura.
 
 IMPERFECCIONES AUTENTICAS (obligatorio, minimo 2 por fragmento):
@@ -37,14 +37,14 @@ es importante, cabe destacar, en este sentido, no obstante, asimismo, en conclus
 REGLAS ABSOLUTAS:
 1. Conserva TODA la informacion, cifras, argumentos y citas. Cero invencion.
 2. Citas en formato (Autor, ano) exactas.
-3. Sin guiones largos (—) ni cortos (–) como puntuacion.
+3. Sin guiones largos (â€”) ni cortos (â€“) como puntuacion.
 4. Sin asteriscos, negritas, listas nuevas ni titulos.
 5. Devuelve UNICAMENTE el texto reescrito.
 6. Respeta los saltos de parrafo del original.`;
 
-const SYSTEM_PROMPT_ANTIDETECTOR = `Eres un editor especializado en hacer textos academicos indetectables para Turnitin y Compilatio. Recibes un texto ya humanizado y aplicas cambios QUIRURGICOS que aumentan la variacion estadistica sin dañar el rigor academico ni el argumento.
+const SYSTEM_PROMPT_ANTIDETECTOR = `Eres un editor especializado en hacer textos academicos indetectables para Turnitin y Compilatio. Recibes un texto ya humanizado y aplicas cambios QUIRURGICOS que aumentan la variacion estadistica sin daÃ±ar el rigor academico ni el argumento.
 
-LO QUE DEBES HACER — SIN EXCEPCION:
+LO QUE DEBES HACER â€” SIN EXCEPCION:
 
 VARIACION DE LONGITUD (lo mas importante):
 - Identifica las 3 oraciones mas largas del texto y divide cada una en dos
@@ -102,7 +102,7 @@ export async function POST(request) {
     };
 
     const modeInstructions = {
-      academic:     `Texto academico con norma APA 7. Tercera persona preferente. Conserva citas en formato (Autor, año). Lenguaje riguroso con voz personal.`,
+      academic:     `Texto academico con norma APA 7. Tercera persona preferente. Conserva citas en formato (Autor, aÃ±o). Lenguaje riguroso con voz personal.`,
       professional: `Texto profesional/empresarial. Directo y convincente con voz personal.`,
       casual:       `Texto divulgativo. Accesible y fluido con ejemplos concretos.`,
     };
@@ -127,7 +127,7 @@ export async function POST(request) {
     const systemToUse = isAntiDetector ? SYSTEM_PROMPT_ANTIDETECTOR : SYSTEM_PROMPT_QUALITY;
 
     const payload = JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
+      model: 'llama-3.1-8b-instant',
       messages: [
         { role: 'system', content: systemToUse },
         { role: 'user',   content: prompt },
@@ -152,7 +152,7 @@ export async function POST(request) {
       if (groqRes.status === 429) {
         if (attempt === MAX_RETRIES) {
           return NextResponse.json(
-            { error: 'Límite de solicitudes alcanzado tras varios intentos. Espera un minuto e intenta de nuevo.' },
+            { error: 'LÃ­mite de solicitudes alcanzado tras varios intentos. Espera un minuto e intenta de nuevo.' },
             { status: 429 }
           );
         }
@@ -176,8 +176,8 @@ export async function POST(request) {
     }
 
     result = result
-      .replace(/ — /g, ', ').replace(/ – /g, ', ')
-      .replace(/—/g, ', ').replace(/–/g, ', ')
+      .replace(/ â€” /g, ', ').replace(/ â€“ /g, ', ')
+      .replace(/â€”/g, ', ').replace(/â€“/g, ', ')
       .replace(/\*\*(.+?)\*\*/g, '$1').replace(/\*(.+?)\*/g, '$1').replace(/\*/g, '');
 
     return NextResponse.json({ result, index });
