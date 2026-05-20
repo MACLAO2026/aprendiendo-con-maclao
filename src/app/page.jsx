@@ -40,6 +40,7 @@ export default function Home() {
   const [passes,     setPasses]     = useState(1);
   const [profession, setProfession] = useState('');
   const [filename,   setFilename]   = useState('humanizado');
+  const [originalDocxFile, setOriginalDocxFile] = useState(null);
 
   const { humanize, cancel, reset, status, progress, step, result, error } = useHumanizer();
   const { history, saveEntry, deleteEntry, clearHistory } = useHistory();
@@ -52,9 +53,10 @@ export default function Home() {
   const chunkCount   = chunks.length;
 
   /* ── handlers ───────────────────────────────────────────────────── */
-  const handleFileLoaded = useCallback((text, fname) => {
+  const handleFileLoaded = useCallback((text, fname, file) => {
     setInputText(text);
     if (fname) setFilename(fname.replace(/\.[^/.]+$/, ''));
+    setOriginalDocxFile(file && /\.docx$/i.test(fname || '') ? file : null);
     reset();
   }, [reset]);
 
@@ -274,7 +276,7 @@ export default function Home() {
                 </button>
               )}
 
-              {isDone && <ExportButtons text={result} filename={filename} />}
+              {isDone && <ExportButtons text={result} filename={filename} originalDocxFile={originalDocxFile} />}
             </div>
 
             {/* Compare panel */}

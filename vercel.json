@@ -5,6 +5,9 @@
     },
     "src/app/api/upload/route.js": {
       "maxDuration": 30
+    },
+    "src/app/api/reconstruct/route.js": {
+      "maxDuration": 60
     }
   }
 }

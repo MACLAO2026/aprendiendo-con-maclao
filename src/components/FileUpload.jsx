@@ -25,7 +25,7 @@ export default function FileUpload({ onTextLoaded, disabled }) {
 
       if (!res.ok) throw new Error(data.error || 'Error al procesar el archivo');
 
-      onTextLoaded(data.text, data.filename);
+      onTextLoaded(data.text, data.filename, file);
     } catch (err) {
       setError(err.message);
     } finally {
