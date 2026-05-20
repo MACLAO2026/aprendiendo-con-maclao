@@ -17,14 +17,31 @@ export default function FileUpload({ onTextLoaded, disabled }) {
     setUploading(true);
 
     try {
+      const ext = file.name.split('.').pop().toLowerCase();
+
+      // Extract .docx entirely in the browser — avoids Vercel's 4.5 MB body limit
+      if (ext === 'docx') {
+        const mammoth = (await import('mammoth')).default;
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        if (!result.value.trim()) throw new Error('El documento Word está vacío o no contiene texto.');
+        onTextLoaded(result.value, file.name, file);
+        return;
+      }
+
+      // .txt and .pdf go through the server
       const form = new FormData();
       form.append('file', file);
 
       const res = await fetch('/api/upload', { method: 'POST', body: form });
-      const data = await res.json();
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch {
+        if (res.status === 413) throw new Error('El archivo es demasiado grande. Pega el texto directamente en el área de texto.');
+        throw new Error(`Error del servidor (${res.status})`);
+      }
 
       if (!res.ok) throw new Error(data.error || 'Error al procesar el archivo');
-
       onTextLoaded(data.text, data.filename, file);
     } catch (err) {
       setError(err.message);
