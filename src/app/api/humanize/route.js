@@ -151,7 +151,7 @@ export async function POST(request) {
     const systemToUse = isAntiDetector ? SYSTEM_PROMPT_ANTIDETECTOR : SYSTEM_PROMPT_QUALITY;
 
     const payload = JSON.stringify({
-      model: 'gemma2-9b-it',
+      model: 'llama-3.3-70b-versatile',
       messages: [
         { role: 'system', content: systemToUse },
         { role: 'user',   content: prompt },
