@@ -151,7 +151,7 @@ export async function POST(request) {
     const systemToUse = isAntiDetector ? SYSTEM_PROMPT_ANTIDETECTOR : SYSTEM_PROMPT_QUALITY;
 
     const payload = JSON.stringify({
-      model: 'mixtral-8x7b-32768',
+      model: 'gemma2-9b-it',
       messages: [
         { role: 'system', content: systemToUse },
         { role: 'user',   content: prompt },
