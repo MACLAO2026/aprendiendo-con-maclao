@@ -151,48 +151,51 @@ export async function POST(request) {
     const systemToUse = isAntiDetector ? SYSTEM_PROMPT_ANTIDETECTOR : SYSTEM_PROMPT_QUALITY;
 
     const payload = JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
+      model: 'mixtral-8x7b-32768',
+      messages: [
+        { role: 'system', content: systemToUse },
+        { role: 'user',   content: prompt },
+      ],
       max_tokens: 2500,
-      temperature: 1.0,
-      system: systemToUse,
-      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.9,
     });
 
     let result = '';
     const MAX_RETRIES = 4;
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-      const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
+      const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': process.env.ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01',
+          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
         },
         body: payload,
       });
 
-      if (anthropicRes.status === 429) {
+      if (groqRes.status === 429) {
         if (attempt === MAX_RETRIES) {
           return NextResponse.json(
             { error: 'Límite de solicitudes alcanzado tras varios intentos. Espera un minuto e intenta de nuevo.' },
             { status: 429 }
           );
         }
-        const retryAfter = anthropicRes.headers.get('retry-after');
-        const waitMs = retryAfter ? Math.ceil(parseFloat(retryAfter) * 1000) + 500 : (attempt + 1) * 15000;
+        const errData = await groqRes.json().catch(() => ({}));
+        const msg = errData?.error?.message || '';
+        const match = msg.match(/try again in ([0-9.]+)s/);
+        const waitMs = match ? Math.ceil(parseFloat(match[1]) * 1000) + 500 : (attempt + 1) * 15000;
         console.log(`[/api/humanize] Rate limit, esperando ${waitMs}ms (intento ${attempt + 1}/${MAX_RETRIES})`);
         await new Promise(r => setTimeout(r, waitMs));
         continue;
       }
 
-      if (!anthropicRes.ok) {
-        const errData = await anthropicRes.json().catch(() => ({}));
-        throw new Error(errData?.error?.message || `HTTP ${anthropicRes.status}`);
+      if (!groqRes.ok) {
+        const errData = await groqRes.json().catch(() => ({}));
+        throw new Error(errData?.error?.message || `HTTP ${groqRes.status}`);
       }
 
-      const data = await anthropicRes.json();
-      result = data.content?.[0]?.text || '';
+      const groqData = await groqRes.json();
+      result = groqData.choices?.[0]?.message?.content || '';
       break;
     }
 
