@@ -141,7 +141,7 @@ export async function POST(request) {
         { role: 'system', content: systemToUse },
         { role: 'user',   content: prompt },
       ],
-      max_tokens: 1500,
+      max_tokens: 2500,
       temperature: 0.9,
     });
 
