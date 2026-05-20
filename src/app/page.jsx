@@ -104,7 +104,7 @@ export default function Home() {
             <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full text-sm font-bold"
                  style={{ background:'rgba(245,158,11,0.15)', border:'1px solid rgba(245,158,11,0.5)', color:'#FBBF24' }}>
               <span className="w-2 h-2 rounded-full animate-pulse" style={{ background:'#FBBF24' }}/>
-              Humanizador de Textos con IA — 0% detección en Turnitin
+              Elude Turnitin · ZeroGPT · GPTZero · Copyleaks · Compilatio
             </div>
             <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4"
                 style={{ color: 'var(--text)' }}>

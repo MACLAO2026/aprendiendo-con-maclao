@@ -38,12 +38,16 @@ const PILLARS = [
   { icon: '🤝', label: 'Comunidad' },
 ];
 
+const DETECTORS = [
+  'Turnitin', 'ZeroGPT', 'GPTZero', 'Copyleaks', 'Compilatio',
+];
+
 const FEATURES = [
-  { icon: '🔁', title: 'Hasta 3 pasadas de humanización', desc: 'Cuantas más pasadas, más natural suena el texto. Reduce la detección de IA drásticamente.' },
+  { icon: '🛡️', title: 'Evasión multi-detector', desc: 'Diseñado para eludir Turnitin, ZeroGPT, GPTZero, Copyleaks y Compilatio. Los algoritmos atacan los patrones estadísticos que cada detector busca.' },
+  { icon: '🔁', title: 'Hasta 3 pasadas de humanización', desc: 'Cuantas más pasadas, más natural suena el texto. El filtro anti-detector final aplica cambios quirúrgicos que ningún detector reconoce.' },
   { icon: '🎓', title: 'Norma APA 7 automática', desc: 'Todos los documentos salen con formato APA 7: márgenes, tipografía, doble espacio y sangría correcta.' },
   { icon: '🏛️', title: '10 áreas de conocimiento', desc: 'Derecho, Medicina, Contaduría, Psicología, Ingeniería y más — vocabulario experto por profesión.' },
   { icon: '📄', title: 'Exporta a Word y PDF', desc: 'Descarga tu texto listo para entregar, con formato profesional incluido.' },
-  { icon: '📚', title: 'Soporta documentos largos', desc: 'Procesa tesis completas de más de 20.000 palabras dividiéndolas en fragmentos automáticamente.' },
   { icon: '🔒', title: 'Privacidad total', desc: 'No guardamos tus textos en ningún servidor. Todo se procesa y se olvida.' },
 ];
 
@@ -54,7 +58,7 @@ export default function Landing({ onEnterApp }) {
   const [openFaq, setOpenFaq] = useState(null);
 
   const faqs = [
-    { q: '¿Funciona con Turnitin?', a: 'La app está diseñada para producir texto con patrones de escritura humana. Usa burstiness alta y reformulación estructural profunda. Con 2-3 pasadas y el filtro anti-detector, los resultados mejoran considerablemente.' },
+    { q: '¿Funciona con Turnitin, ZeroGPT y Copyleaks?', a: 'Sí. El humanizador está diseñado específicamente para eludir Turnitin, ZeroGPT, GPTZero, Copyleaks y Compilatio. Ataca los patrones estadísticos (burstiness, perplexity, uniformidad sintáctica) que cada detector usa. Con 2-3 pasadas y el filtro anti-detector final, los resultados son sólidos.' },
     { q: '¿Mis textos quedan guardados?', a: 'No. El texto se envía a la IA para procesarlo y nunca se almacena en nuestros servidores. El historial solo existe en tu navegador.' },
     { q: '¿Funciona para cualquier materia?', a: 'Sí. Tiene modos Académico, Profesional y Divulgativo, más 10 áreas de conocimiento con vocabulario experto por profesión.' },
     { q: '¿Puedo cargar archivos Word o PDF?', a: 'Sí. Acepta archivos .txt, .docx y .pdf de hasta 50 MB.' },
@@ -114,7 +118,7 @@ export default function Landing({ onEnterApp }) {
           <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full text-sm font-bold"
                style={{ background:'rgba(245,158,11,0.15)', border:'1px solid rgba(245,158,11,0.5)', color:'#FBBF24' }}>
             <span className="w-2 h-2 rounded-full animate-pulse" style={{ background:'#FBBF24' }}/>
-            Humanizador de Textos con IA — 0% detección en Turnitin
+            Elude Turnitin · ZeroGPT · GPTZero · Copyleaks · Compilatio
           </div>
 
           <h1 className="font-black tracking-tight mb-4 leading-tight"
@@ -125,11 +129,22 @@ export default function Landing({ onEnterApp }) {
             <span style={{ background: GOLD, WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' }}>humano.</span>
           </h1>
 
-          <p className="text-base sm:text-lg max-w-2xl mx-auto mb-8 leading-relaxed"
+          <p className="text-base sm:text-lg max-w-2xl mx-auto mb-6 leading-relaxed"
              style={{ color: 'rgba(245,230,255,0.7)' }}>
-            Humaniza tesis, artículos y trabajos en minutos. Norma APA 7 automática,
-            exportación a Word y PDF, filtro anti-detector y vocabulario experto por profesión.
+            Diseñado para eludir sin problemas la detección de IA. Nuestros algoritmos
+            atacan los patrones estadísticos que Turnitin, ZeroGPT, GPTZero, Copyleaks
+            y Compilatio usan para detectar IA — y se actualizan constantemente.
           </p>
+
+          {/* Detector strip */}
+          <div className="flex flex-wrap justify-center gap-2 mb-8">
+            {DETECTORS.map(d => (
+              <span key={d} className="px-3 py-1 rounded-full text-xs font-bold"
+                    style={{ background:'rgba(155,114,207,0.25)', border:'1px solid rgba(192,38,211,0.4)', color:'#E879F9' }}>
+                ✓ {d}
+              </span>
+            ))}
+          </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
             <button onClick={onEnterApp}

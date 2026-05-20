@@ -29,6 +29,15 @@ IMPERFECCIONES AUTENTICAS (obligatorio, minimo 2 por fragmento):
 - Una pregunta retorica embebida en el parrafo
 - Una frase incompleta seguida de dos puntos que cierra sola
 
+PARA ENGAÑAR A ZeroGPT Y GPTZero (miden PERPLEJIDAD y BURSTINESS):
+- Usa palabras de baja frecuencia pero correctas: en vez de "muestra" usa "evidencia", en vez de "hace referencia" usa "alude", en vez de "establece" usa "consagra", en vez de "importante" usa "cardinal", en vez de "necesario" usa "imperativo".
+- Al menos 3 oraciones por fragmento deben ser impredecibles sintacticamente: rompe el orden sujeto-verbo-objeto.
+- Mezcla registros: una oracion tecnica seguida de una coloquial breve es mas humana que dos tecnicas seguidas.
+
+PARA ENGAÑAR A Copyleaks (analisis semantico-estructural):
+- Varia la densidad de informacion: un parrafo denso en datos, el siguiente mas reflexivo y escaso en cifras.
+- No uses la misma estructura argumentativa dos veces seguidas (afirmacion-ejemplo-conclusion es predecible).
+
 VOCABULARIO: Si una palabra abstracta (proceso, contexto, ambito, elemento, aspecto, mecanismo) ya aparecio en el parrafo anterior, no puede repetirse. Busca el sinonimo menos obvio.
 
 FRASES PROHIBIDAS (ninguna aparece):
