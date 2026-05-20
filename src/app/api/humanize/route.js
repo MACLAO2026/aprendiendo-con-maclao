@@ -105,9 +105,9 @@ export async function POST(request) {
       return NextResponse.json({ error: 'chunk invalido' }, { status: 400 });
     }
 
-    if (!process.env.ANTHROPIC_API_KEY) {
+    if (!process.env.GEMINI_API_KEY) {
       return NextResponse.json(
-        { error: 'ANTHROPIC_API_KEY no esta configurada en .env.local' },
+        { error: 'GEMINI_API_KEY no esta configurada en .env.local' },
         { status: 500 }
       );
     }
@@ -151,51 +151,48 @@ export async function POST(request) {
     const systemToUse = isAntiDetector ? SYSTEM_PROMPT_ANTIDETECTOR : SYSTEM_PROMPT_QUALITY;
 
     const payload = JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
+      model: 'gemini-2.0-flash',
       messages: [
         { role: 'system', content: systemToUse },
         { role: 'user',   content: prompt },
       ],
       max_tokens: 1500,
-      temperature: 0.9,
+      temperature: 1.0,
     });
 
     let result = '';
     const MAX_RETRIES = 4;
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-      const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      const geminiRes = await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+          'Authorization': `Bearer ${process.env.GEMINI_API_KEY}`,
         },
         body: payload,
       });
 
-      if (groqRes.status === 429) {
+      if (geminiRes.status === 429) {
         if (attempt === MAX_RETRIES) {
           return NextResponse.json(
             { error: 'Límite de solicitudes alcanzado tras varios intentos. Espera un minuto e intenta de nuevo.' },
             { status: 429 }
           );
         }
-        const errData = await groqRes.json().catch(() => ({}));
-        const msg = errData?.error?.message || '';
-        const match = msg.match(/try again in ([0-9.]+)s/);
-        const waitMs = match ? Math.ceil(parseFloat(match[1]) * 1000) + 500 : (attempt + 1) * 15000;
-        console.log(`[/api/humanize] Rate limit, esperando ${waitMs}ms (intento ${attempt + 1}/${MAX_RETRIES})`);
+        const waitMs = (attempt + 1) * 10000;
+        console.log(`[/api/humanize] Rate limit Gemini, esperando ${waitMs}ms (intento ${attempt + 1}/${MAX_RETRIES})`);
         await new Promise(r => setTimeout(r, waitMs));
         continue;
       }
 
-      if (!groqRes.ok) {
-        const errData = await groqRes.json().catch(() => ({}));
-        throw new Error(errData?.error?.message || `HTTP ${groqRes.status}`);
+      if (!geminiRes.ok) {
+        const errData = await geminiRes.json().catch(() => ({}));
+        throw new Error(errData?.error?.message || `HTTP ${geminiRes.status}`);
       }
 
-      const groqData = await groqRes.json();
-      result = groqData.choices?.[0]?.message?.content || '';
+      const geminiData = await geminiRes.json();
+      result = geminiData.choices?.[0]?.message?.content || '';
       break;
     }
 
