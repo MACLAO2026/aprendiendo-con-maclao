@@ -3,7 +3,7 @@
  * Respects paragraph boundaries to preserve context.
  */
 
-const DEFAULT_CHUNK_WORDS = parseInt(process.env.CHUNK_SIZE || '600', 10);
+const DEFAULT_CHUNK_WORDS = parseInt(process.env.CHUNK_SIZE || '350', 10);
 
 /**
  * Split text into chunks of approximately `maxWords` words each.
