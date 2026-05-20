@@ -41,8 +41,9 @@ async function extractFromPdf(buffer) {
 
 async function extractFromDocx(buffer) {
   try {
-    const { extractNonTableText } = await import('@/lib/docxReconstructor');
-    return extractNonTableText(buffer);
+    const mammoth = (await import('mammoth')).default;
+    const result = await mammoth.extractRawText({ buffer });
+    return result.value;
   } catch (err) {
     throw new Error(`No se pudo leer el documento Word: ${err.message}`);
   }

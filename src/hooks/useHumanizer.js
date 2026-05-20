@@ -116,8 +116,10 @@ export function useHumanizer() {
           });
 
           if (!res.ok) {
-            const err = await res.json().catch(() => ({ error: 'Error desconocido' }));
-            throw new Error(err.error || `HTTP ${res.status}`);
+            const text = await res.text().catch(() => '');
+            let msg = `HTTP ${res.status}`;
+            try { msg = JSON.parse(text).error || msg; } catch { if (text) msg = text.slice(0, 150); }
+            throw new Error(msg);
           }
 
           const data = await res.json();
@@ -165,8 +167,10 @@ export function useHumanizer() {
           });
 
           if (!res.ok) {
-            const err = await res.json().catch(() => ({ error: 'Error desconocido' }));
-            throw new Error(err.error || `HTTP ${res.status}`);
+            const text = await res.text().catch(() => '');
+            let msg = `HTTP ${res.status}`;
+            try { msg = JSON.parse(text).error || msg; } catch { if (text) msg = text.slice(0, 150); }
+            throw new Error(msg);
           }
 
           const data = await res.json();
