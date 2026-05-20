@@ -3,6 +3,49 @@ import { useState, useCallback, useRef } from 'react';
 import { splitIntoChunks, joinChunks } from '@/lib/chunker';
 
 /**
+ * Remove editorial notes and deduplicate repeated signature phrases added by the model.
+ * Each imperfection phrase should appear at most once in the full document.
+ */
+function removeRepeatedPatterns(text) {
+  // Remove editorial notes the model sometimes adds
+  let cleaned = text
+    .replace(/\(Nota:[^)]{0,300}\)/gi, '')
+    .replace(/\(Se ha[^)]{0,200}\)/gi, '')
+    .replace(/\(Cambios[^)]{0,200}\)/gi, '')
+    .replace(/\(Los cambios[^)]{0,200}\)/gi, '')
+    .replace(/\(Se han realizado[^)]{0,300}\)/gi, '');
+
+  // Remove fake numbered footnote markers like (1), (2), (3) that aren't real citations
+  // Real citations look like (Author, year) — we only remove standalone single-digit markers
+  cleaned = cleaned.replace(/\((\d)\)(?!\s*[A-Za-záéíóúÁÉÍÓÚñÑ])/g, '');
+
+  // Deduplicate repeated imperfection phrases — keep only the first occurrence
+  const signaturePhrases = [
+    /[Yy] eso,?\s+en la pr[aá]ctica,?\s+no es (un detalle|menor)[^.]*\./g,
+    /[Ee]so merece detenerse[^.]*\./g,
+    /[Yy] eso,?\s+en la pr[aá]ctica,?\s+no es (poco|trivial|menor)[^.]*\./g,
+    /[Nn]o es (un detalle|un asunto|una cuestión) menor[^.]*\./g,
+    /[Ee]so,?\s+en t[eé]rminos pr[aá]cticos,?\s+no es[^.]*\./g,
+  ];
+
+  for (const pattern of signaturePhrases) {
+    let count = 0;
+    cleaned = cleaned.replace(pattern, (match) => {
+      count++;
+      return count === 1 ? match : '';
+    });
+  }
+
+  // Clean up any double spaces or blank lines created by removals
+  cleaned = cleaned
+    .replace(/  +/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+
+  return cleaned;
+}
+
+/**
  * Core humanization hook.
  * Handles chunking, sequential API calls, progress tracking and cancellation.
  */
@@ -138,6 +181,9 @@ export function useHumanizer() {
           .replace(/\*(.+?)\*/g, '$1')
           .replace(/\*/g, '');
       }
+
+      // 5. Post-process: remove editorial notes and deduplicate repeated signature phrases
+      currentText = removeRepeatedPatterns(currentText);
 
       setProgress(100);
       setResult(currentText);
