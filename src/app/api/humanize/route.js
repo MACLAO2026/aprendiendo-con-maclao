@@ -124,9 +124,9 @@ export async function POST(request) {
       return NextResponse.json({ error: 'chunk invalido' }, { status: 400 });
     }
 
-    if (!process.env.GEMINI_API_KEY) {
+    if (!process.env.ANTHROPIC_API_KEY) {
       return NextResponse.json(
-        { error: 'GEMINI_API_KEY no esta configurada en .env.local' },
+        { error: 'ANTHROPIC_API_KEY no esta configurada en .env.local' },
         { status: 500 }
       );
     }
@@ -165,60 +165,56 @@ export async function POST(request) {
 
     const chunkNote = total > 1 ? `Fragmento ${index + 1} de ${total}.\n\n` : '';
 
-    const prompt = `Modo: ${contextNote}\n\n${passNote}${chunkNote}Texto a transformar con tu voz:\n\n${chunk}`;
+    const userPrompt = `Modo: ${contextNote}\n\n${passNote}${chunkNote}Texto a transformar con tu voz:\n\n${chunk}`;
 
     const systemToUse = isAntiDetector ? SYSTEM_PROMPT_ANTIDETECTOR : SYSTEM_PROMPT_QUALITY;
 
-    const payload = JSON.stringify({
-      model: 'gemini-2.0-flash',
-      messages: [
-        { role: 'system', content: systemToUse },
-        { role: 'user',   content: prompt },
-      ],
-      max_tokens: 1500,
-      temperature: 1.0,
-    });
-
     let result = '';
-    const MAX_RETRIES = 2;
+    const MAX_RETRIES = 3;
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-      const geminiRes = await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', {
+      const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.GEMINI_API_KEY}`,
+          'x-api-key': process.env.ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
         },
-        body: payload,
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 1800,
+          system: systemToUse,
+          messages: [{ role: 'user', content: userPrompt }],
+        }),
       });
 
-      if (geminiRes.status === 429) {
+      if (anthropicRes.status === 429 || anthropicRes.status === 529) {
         if (attempt === MAX_RETRIES) {
           return NextResponse.json(
-            { error: 'Límite de solicitudes alcanzado. Espera 30 segundos e intenta de nuevo.' },
+            { error: 'Limite de solicitudes alcanzado. Espera unos segundos e intenta de nuevo.' },
             { status: 429 }
           );
         }
-        const waitMs = (attempt + 1) * 8000;
-        console.log(`[/api/humanize] Rate limit Gemini, esperando ${waitMs}ms (intento ${attempt + 1}/${MAX_RETRIES})`);
+        const waitMs = (attempt + 1) * 3000;
+        console.log(`[/api/humanize] Rate limit Anthropic, esperando ${waitMs}ms (intento ${attempt + 1}/${MAX_RETRIES})`);
         await new Promise(r => setTimeout(r, waitMs));
         continue;
       }
 
-      if (!geminiRes.ok) {
-        const errData = await geminiRes.json().catch(() => ({}));
-        throw new Error(errData?.error?.message || `HTTP ${geminiRes.status}`);
+      if (!anthropicRes.ok) {
+        const errData = await anthropicRes.json().catch(() => ({}));
+        throw new Error(errData?.error?.message || `HTTP ${anthropicRes.status}`);
       }
 
-      const geminiData = await geminiRes.json();
-      result = geminiData.choices?.[0]?.message?.content || '';
+      const anthropicData = await anthropicRes.json();
+      result = anthropicData.content?.[0]?.text || '';
       break;
     }
 
     result = result
-      .replace(/ â€" /g, ', ').replace(/ â€" /g, ', ')
-      .replace(/â€"/g, ', ').replace(/â€"/g, ', ')
-      .replace(/\*\*(.+?)\*\*/g, '$1').replace(/\*(.+?)\*/g, '$1').replace(/\*/g, '');
+      .replace(/\*\*(.+?)\*\*/g, '$1')
+      .replace(/\*(.+?)\*/g, '$1')
+      .replace(/\*/g, '');
 
     return NextResponse.json({ result, index });
   } catch (err) {

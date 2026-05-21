@@ -185,7 +185,7 @@ export function useHumanizer() {
           const chunkDone = passBase + Math.round(((i + 1) / total) * passShare);
           setProgress(chunkDone);
 
-          if (i < total - 1) await new Promise(r => setTimeout(r, 12000));
+          if (i < total - 1) await new Promise(r => setTimeout(r, 2000));
         }
 
         // 3. Join results — output becomes input for next pass
@@ -233,7 +233,7 @@ export function useHumanizer() {
           const data = await res.json();
           antiResults[i] = data.result;
           setProgress(93 + Math.round(((i + 1) / antiChunks.length) * 6));
-          if (i < antiChunks.length - 1) await new Promise(r => setTimeout(r, 6000));
+          if (i < antiChunks.length - 1) await new Promise(r => setTimeout(r, 1500));
         }
 
         currentText = joinChunks(antiResults)
