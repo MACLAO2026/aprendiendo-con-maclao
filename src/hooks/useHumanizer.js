@@ -2,6 +2,40 @@
 import { useState, useCallback, useRef } from 'react';
 import { splitIntoChunks, joinChunks } from '@/lib/chunker';
 
+function removeForbiddenPhrases(text) {
+  return text
+    .replace(/\bEn consecuencia,\s*/g, 'Así las cosas, ')
+    .replace(/\ben consecuencia,\s*/g, 'así las cosas, ')
+    .replace(/\bEn este sentido,\s*/g, '')
+    .replace(/\ben este sentido,\s*/g, '')
+    .replace(/\bAsimismo,\s*/g, '')
+    .replace(/\basimismo,\s*/g, '')
+    .replace(/\basimismo\b/g, 'también')
+    .replace(/\bEn conclusión,?\s*/g, '')
+    .replace(/\bEn resumen,?\s*/g, '')
+    .replace(/\bEn definitiva,?\s*/g, '')
+    .replace(/\bes importante\b/gi, 'resulta de interés')
+    .replace(/\bcabe destacar\b/gi, 'conviene anotar')
+    .replace(/\bcabe mencionar\b/gi, 'vale mencionar')
+    .replace(/\bes fundamental\b/gi, 'resulta cardinal')
+    .replace(/\bes crucial\b/gi, 'resulta determinante')
+    .replace(/\bhoy en día\b/gi, 'en el presente')
+    .replace(/\bactualmente\b/gi, 'en el momento actual')
+    .replace(/\bse puede observar\b/gi, 'se advierte')
+    .replace(/\bse evidencia\b/gi, 'se constata')
+    .replace(/\bresulta evidente que\b/gi, 'se desprende que')
+    .replace(/\bpodemos (decir|observar|ver|concluir|señalar)\b/gi, 'se constata que')
+    .replace(/\bjuega un papel\b/gi, 'cumple una función')
+    .replace(/\bcon el fin de\b/gi, 'para')
+    .replace(/\ben el marco de\b/gi, 'dentro de')
+    .replace(/\ben el ámbito de\b/gi, 'en el campo de')
+    .replace(/\bdesde la perspectiva de\b/gi, 'desde la óptica de')
+    .replace(/\bvale la pena mencionar\b/gi, 'conviene señalar')
+    .replace(/  +/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 /**
  * Remove editorial notes and deduplicate repeated signature phrases added by the model.
  * Each imperfection phrase should appear at most once in the full document.
@@ -186,8 +220,8 @@ export function useHumanizer() {
           .replace(/\*/g, '');
       }
 
-      // 5. Post-process: remove editorial notes and deduplicate repeated signature phrases
-      currentText = removeRepeatedPatterns(currentText);
+      // 5. Post-process: remove forbidden phrases and editorial notes
+      currentText = removeForbiddenPhrases(removeRepeatedPatterns(currentText));
 
       setProgress(100);
       setResult(currentText);
