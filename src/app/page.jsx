@@ -37,7 +37,7 @@ export default function Home() {
   const [activeTab,  setActiveTab]  = useState('editor');
   const [inputText,  setInputText]  = useState('');
   const [mode,       setMode]       = useState('academic');
-  const [passes,     setPasses]     = useState(1);
+  const [passes,     setPasses]     = useState(2);
   const [profession, setProfession] = useState('');
   const [filename,   setFilename]   = useState('humanizado');
   const [originalDocxFile, setOriginalDocxFile] = useState(null);
