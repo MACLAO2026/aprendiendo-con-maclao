@@ -161,7 +161,7 @@ export async function POST(request) {
     });
 
     let result = '';
-    const MAX_RETRIES = 4;
+    const MAX_RETRIES = 2;
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       const geminiRes = await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', {
@@ -176,11 +176,11 @@ export async function POST(request) {
       if (geminiRes.status === 429) {
         if (attempt === MAX_RETRIES) {
           return NextResponse.json(
-            { error: 'Límite de solicitudes alcanzado tras varios intentos. Espera un minuto e intenta de nuevo.' },
+            { error: 'Límite de solicitudes alcanzado. Espera 30 segundos e intenta de nuevo.' },
             { status: 429 }
           );
         }
-        const waitMs = (attempt + 1) * 10000;
+        const waitMs = (attempt + 1) * 8000;
         console.log(`[/api/humanize] Rate limit Gemini, esperando ${waitMs}ms (intento ${attempt + 1}/${MAX_RETRIES})`);
         await new Promise(r => setTimeout(r, waitMs));
         continue;
